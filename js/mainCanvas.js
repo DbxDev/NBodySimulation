@@ -16,13 +16,32 @@ window.onload = function()
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
 		InitBackground(context);
-		sphere1 = new Sphere(10,1,50 ,50 ,0,0,255,0  ,0);
-		sphere2 = new Sphere(20,1,250,150,0,0,0  ,255,0);
+		sphere1 = new Sphere(10,1,50 ,50 ,0.001,0.001,255,0  ,0);
+		sphere1 = new Sphere(10,1,50 ,50 ,0.001,0.001,255,0  ,0);
+		sphere2 = new Sphere(20,1,250,150,1,1,0  ,255,0);
 		
 		sphere1.Draw(context);
 		sphere2.Draw(context);
+		
+		var myInterval = setInterval(animate, STATIC_VALUES.DT);
+		
+		/** animation function **/
+		function animate(){
+			console.log("Calling animate " + sphere1.x + " " + sphere1.y);
+			// TODO Compute everything
+			
+			// RAZ canvas
+			context.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-2, STATIC_VALUES.MAX_Y_COORD-2);
+			// TODO : Draw everything
+			sphere1.x += STATIC_VALUES.DT * sphere1.vx;
+			sphere1.y += STATIC_VALUES.DT * sphere1.vy;
+			sphere1.Draw(context);
+		}
 
 }
+
+
+
 
 /* convention
 |-----> y
@@ -36,6 +55,10 @@ function StaticValues(canvas) {
 	this.MIN_Y_COORD = this.BORDER;
 	this.MAX_X_COORD = canvas.width - this.BORDER;
 	this.MAX_Y_COORD = canvas.height - this.BORDER;
+	
+	/** dt **/
+	this.DT = 1000 // in ms
+	
 	console.log("Static values instanciated.")
 }
 
