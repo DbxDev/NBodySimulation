@@ -1,6 +1,6 @@
 window.onload = function()
 {
-	return; // TODO Remove to display canvas 
+
     var canvas = document.getElementById('my_canvas');
         if(!canvas)
         {
@@ -17,9 +17,14 @@ window.onload = function()
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
 		InitBackground(context);
-		sphere1 = new Sphere(10,1,50 ,50 ,0.1,0.1,255,0  ,0);
 
-		sphere1.Draw(context);
+        allSphere = new Array();
+
+        for (var i=0 ; i< 50 ; i++ ) {
+            allSphere[i] = new Sphere(2*i,1,50+2*i ,300 -3*i,0.1,0.15,3*(i%3),3*((i+1)%3)  ,3*((i+2)%3));
+        }
+		sphere1 = new Sphere(10,1,50 ,50 ,0.1,0.15,255,0  ,0);
+        sphere2 = new Sphere(25,1,150 ,150 ,0.15,0.10,0  ,255,0);
 
 		var myInterval = setInterval(animate, STATIC_VALUES.DT);
 		
@@ -32,10 +37,15 @@ window.onload = function()
 			
 			InitBackground(context)
 			// TODO : Draw everything
-			sphere1.x += STATIC_VALUES.DT * speedPixelConstant(sphere1.vx);
-			sphere1.y += STATIC_VALUES.DT * speedPixelConstant(sphere1.vy);
+			sphere1.Move(STATIC_VALUES.DT);
 			sphere1.Draw(context);
-		}
+            sphere2.Move(STATIC_VALUES.DT);
+            sphere2.Draw(context);
+            for (var i=0 ; i< 50 ; i++ ) {
+                allSphere[i].Move(STATIC_VALUES.DT);
+                allSphere[i].Draw(context);
+            }
+        }
 
 }
 
@@ -55,6 +65,8 @@ function StaticValues(canvas) {
 	this.UNIT_SPACE_TO_PX = 10;
 	/** dt **/
 	this.DT = 1000/80 // in ms
+    /** Simulation vars **/
+    this.INFINITE = 999999999;
 	
 	console.log("Static values instanciated.")
 }
@@ -81,9 +93,11 @@ function Sphere(radius, mass, x , y , vx , vy , r , g ,b){
 	this.vx = vx;
 	this.vy = vy;
 	this.color = rgb(r,g,b);
+    this.collision = 0; // number of collisions
 }
 Sphere.prototype.Move = function(dt) {
-	
+	this.x += this.vx * dt;
+    this.y += this.vy * dt;
 }
 Sphere.prototype.Draw = function(context){
 	context.fillStyle = this.color;
@@ -92,6 +106,75 @@ Sphere.prototype.Draw = function(context){
 	context.fill();
 	context.closePath();
 }
+/**
+ * For more info about this physical part, see the excellent Booksite :
+ * http://algs4.cs.princeton.edu/61event/Particle.java.html
+ */
+
+Sphere.prototype.TimeToHitVerticalWall = function(){
+    if (this.vx > 0) return (STATIC_VALUES.MAX_X_COORD - this.x) / this.vx;
+    if (this.vx < 0) return (this.x - STATIC_VALUES.MIN_X_COORD) / this.vx;
+    else return STATIC_VALUES.INFINITE;
+};
+Sphere.prototype.TimeToHitHorizontalWall = function(){
+    if (this.vy > 0) return (STATIC_VALUES.MAX_Y_COORD - this.y) / this.vy;
+    if (this.vy < 0) return (this.y - STATIC_VALUES.MIN_Y_COORD) / this.vy;
+    else return STATIC_VALUES.INFINITE;
+};
+/**
+ * Time to hit a particule
+ * @param other
+ * @returns {number}
+ */
+Sphere.prototype.timeToHit = function(other) {
+    if (this === other) return STATIC_VALUES.INFINITE;
+    var dx = other.x - this.x;
+    var dy = other.y - this.y;
+    var dvx = other.vx - this.vx;
+    var dvy = other.vy - this.vy;
+    var dvdr = dx * dvx + dy * dvy;
+    if (dvdr > 0) return STATIC_VALUES.INFINITE;
+    var dvdv = dvx*dvx + dvy*dvy;
+    var drdr = dx*dx + dy*dy;
+    var sigma = this.radius + other.radius;
+    var d = dvdr*dvdr - dvdv * (drdr - sigma*sigma);
+    if (d<0) return STATIC_VALUES.INFINITE;
+    return - (dvdr + Math.sqrt(d)) / dvdv;
+};
+/**
+ * Bouncing on an other particle
+ * @param other
+ */
+Sphere.prototype.bounceOff = function(other) {
+    var dx = other.x - this.x;
+    var dy = other.y - this.y;
+    var dvx = other.vx - this.vx;
+    var dvy = other.vy - this.vy;
+    var dvdr = dx * dvx + dy * dvy;
+    var dist = this.radius - other.radius;
+
+    // Normal force
+    var F = 2 * this.mass * other.mass * dvdr / ((this.mass + other.mass) * dist);
+    var fx = F * dx / dist;
+    var fy = F * dy / dist;
+
+    // new velocities
+    this.vx += fx / this.mass;
+    this.vy += fy / this.mass;
+    other.vx -= fx / other.mass;
+    other.vy -= fy / other.mass;
+
+    this.collision++;
+    other.collision++;
+};
+Sphere.prototype.bounceOffVerticalWall = function(){
+    this.vx = -this.vx ;
+    this.collision++;
+};
+Sphere.prototype.bounceOffHorizontalWall = function(){
+    this.vy = -this.vy ;
+    this.collision++;
+};
 
 /** tools **/
 function rgb(r,g,b) {
