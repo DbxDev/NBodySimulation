@@ -82,7 +82,9 @@ function Sphere(radius, mass, x , y , vx , vy , r , g ,b){
 	this.vy = vy;
 	this.color = rgb(r,g,b);
 }
-
+Sphere.prototype.Move = function(dt) {
+	
+}
 Sphere.prototype.Draw = function(context){
 	context.fillStyle = this.color;
 	context.beginPath(); 

@@ -115,6 +115,7 @@ function PriorityQueue(){
 		return result;
 	};
 }
+// Standard key with natural order.
 function Key(value) {
     var value = value;
     var that = this;
@@ -134,6 +135,27 @@ function Key(value) {
 		return "[" + value +"]";
 	}
 }
+// Reverse ordered key. This object generate a Min priority queue.
+function MinKey(value) {
+    var value = value;
+    var that = this;
+    this.getValue = function(){
+        return value;
+    };
+    this.compareTo = function(other) {
+        if (typeof(other.getValue()) == typeof(value)) {
+            if (value < other.getValue()) return 1;
+            else if (value === other.getValue()) return 0;
+            else return -1;
+        } else {
+            throw new Error('Comparing two different types of objects : ' + other.getValue() + ' of type '+ typeof(other.getValue()) + ' and ' + value + ' of type ' + typeof(value));
+        }
+    };
+	this.toString = function(){
+		return "[" + value +"]";
+	}
+}
+
 
 function intDiv(i,j){
 	return i/j>>0
