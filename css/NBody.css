@@ -1,0 +1,14 @@
+body {
+	font-family: 'Courier New', monospace;
+}
+div.centered{
+	width : 100%;
+	text-align : center;
+	display: table;
+}
+div.node{
+	
+	text-align : center;
+	display:inline-block;
+	display: table-cell;
+}

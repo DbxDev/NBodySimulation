@@ -1,5 +1,6 @@
 window.onload = function()
 {
+	return; // TODO Remove to display canvas 
     var canvas = document.getElementById('my_canvas');
         if(!canvas)
         {

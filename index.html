@@ -2,31 +2,37 @@
 <html>
     <head>
         <title>N-Body simulation</title>
-        <script src="js/priorityQueue.js"/>
-        <script src="js/mainCanvas.js"/>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-		<style src="css/NBody.css"></style>
+        <script src="js/priorityQueue.js"></script>
+        <script src="js/mainCanvas.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<link href="css/NBody.css" type="text/css" rel="stylesheet" />
     </head>
     <body>
-        <canvas id="my_canvas" width="500" height="500">
-            Canvas is not supported by your browser.
-        </canvas>
         <div id="test">
             <ul id="console">
-                <li>Etape du test :</li>
+                
             </ul>
         </div>
+		<canvas id="my_canvas" width="500" height="500">
+            Canvas is not supported by your browser.
+        </canvas>
     </body>
 <script>
-    size = 10;
+$(document).ready(function () {
+    size = 50;
     PQ = new PriorityQueue();
     for (var i=0 ; i<size ; i++){
-        PQ.Insert(new Key(i%5));
+		val = Math.floor((Math.random()*size)+1);
+        PQ.Insert(new Key(val));
+		console.debug("Value inserted : "+val);
     }
+	$('body').prepend(PQ.printable());
     for (var i=0 ; i<size ; i++){
         maxKey = PQ.DelMax();
-        console.debug("Max key of PQ : "+maxKey.getValue());
-        $('ul#console').append('<li>Max key of PQ : '+maxKey.getValue()+'</li>');
-    }
+		toappend='<li>Max key of PQ : '+maxKey+'</li>';
+        console.debug("Max key of PQ : "+maxKey+"\nAppending : "+toappend);
+       $('ul#console').append(toappend);
+    } 
+});
 </script>
 </html>
