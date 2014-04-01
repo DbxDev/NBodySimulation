@@ -176,6 +176,47 @@ Sphere.prototype.bounceOffHorizontalWall = function(){
     this.collision++;
 };
 
+/** The event object **/
+function Event(sphereA, sphereB, time){
+	this.a = sphereA;
+	this.b = sphereB;
+	this.time = time;
+	this.collisionA = 0;
+	this.collisionB = 0;
+	if (sphereA != undefined) this.collisionA = sphereA.collision;
+	if (sphereB != undefined) this.collisionB = sphereB.collision;
+	
+	this.compareTo = function(other) {
+        if (time < other.time) return 1;
+		else if (time === other.time) return 0;
+		else return -1;
+    };
+	
+	this.toString = function(){
+		return "Event [" + time +"] a="+this.a+" ; b="+b;
+	};
+	this.isValid = function(){
+		var result = false;
+		// If the number of collisions has changed > the event is no more valid
+		if (this.a != undefined)
+			result = result || this.a.collision == this.collisionA;
+		if (this.b != undefined)
+			result = result || this.b.collision == this.collisionB;
+			
+		return result;
+	};
+}
+/** The collision manager **/
+function CollisionManager(){
+	this.events = new PriorityQueue();
+	
+	/** Predicts all the events for a given sphere **/
+	this.predict = function(sphere , t) {
+		
+	}
+}
+
+
 /** tools **/
 function rgb(r,g,b) {
 	return "rgb("+r+","+g+","+b+")";
