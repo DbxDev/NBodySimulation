@@ -11,21 +11,21 @@ function PriorityQueue(){
 
     // Private methods
     var swim = function(i){
-        console.debug("Swimming index " + i);
+        //console.debug("Swimming index " + i);
 		k=i
         while (k>1){
 			half_k= intDiv(k,2);
-			console.debug("k="+k+" : " + heap[k] + " k/2="+half_k+" " + heap[half_k]);
+			//console.debug("k="+k+" : " + heap[k] + " k/2="+half_k+" " + heap[half_k]);
 			
 			if (heap[k].compareTo(heap[half_k]) <= 0 ) break;
 			
             swap(k,half_k);
 			k=half_k;
         }
-        console.debug("New position " + k + "\nArray "+ heap);
+        //console.debug("New position " + k + "\nArray "+ heap);
     };
     var sink = function(i){
-        console.debug("Sinking index " + i);
+        //console.debug("Sinking index " + i);
 		k=i;
         while (k<=size){
             // Compare parent and both children
@@ -63,7 +63,7 @@ function PriorityQueue(){
 				break
 			}
         }
-        console.debug("New position " + k+ "\nArray "+ heap);
+        //console.debug("New position " + k+ "\nArray "+ heap);
     };
     // Public methods
     var swap = function(i,j){
@@ -89,6 +89,7 @@ function PriorityQueue(){
     this.Max = function() {
         return heap[1];
     };
+	this.Size = function() { return size ; };
     this.toString = function(){
         var result = "PQ of size ["+size+"] : ";
         for (var i=0 ; i<size+1; i++) {
