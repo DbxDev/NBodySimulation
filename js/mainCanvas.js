@@ -23,8 +23,8 @@ window.onload = function()
         for (var i=0 ; i< 50 ; i++ ) {
             allSpheres[i] = new Sphere(2*i,1,50+2*i ,300 -3*i,0.1,0.15,3*(i%3),3*((i+1)%3)  ,3*((i+2)%3));
         }
-		sphere1 = new Sphere(10,1,300 ,100 ,0.1,0.1,255,0  ,0);
-        sphere2 = new Sphere(25,1,100 ,400 ,-0.1,-0.1  ,0  ,255,0);
+		sphere1 = new Sphere(10,1,300 ,100 ,0.001,0.001,255,0  ,0);
+        sphere2 = new Sphere(25,1,100 ,400 ,-0.001,-0.001  ,0  ,255,0);
 		console.log("BEGIN Sphere 1 & 2 in CM. Infinite value set to : " + STATIC_VALUES.INFINITE);
 		spheres = new Array(sphere1, sphere2);
 		CM = new CollisionManager(spheres);
@@ -36,12 +36,12 @@ window.onload = function()
 		console.log("END Sphere 1 & 2 in CM");
 		// return;
 		var count=0;
-		while (count<100) {
+		while (count<2) {
 			console.log("Step "+count++);
 			next = CM.nextEvent();
 			console.log("New event : "+next);
 			console.log("Events in queue : " + CM.sizeEventList());
-			if (isNaN(next.time )) throw new Error("NAN TIME");
+			if (isNaN(next.getTime() )) throw new Error("NAN TIME");
 			var timeElapse = 0;
 			// setInterval(animate(next.getDuration()), STATIC_VALUES.DT*1000); // ms expected here
 			CM.resolveEvent(next);
@@ -49,8 +49,9 @@ window.onload = function()
 				spheres[i].Move(next.getDuration());
 				spheres[i].Draw(context);
             }
-			setTimeout(function(){},1000);
+			setTimeout(this,10000);
 		}
+    $('body').append(CM.printable());
 		var myInterval = setInterval(animate(100000), STATIC_VALUES.DT*1000);
 		
 		/** animation function **/
@@ -131,6 +132,7 @@ function Sphere(radius, mass, x , y , vx , vy , r , g ,b){
 	}
 }
 Sphere.prototype.Move = function(dt) {
+    console.log("moving particule " + this +"during dt="+dt+ " dx="+ (this.vx*dt) + " vy="+(this.vy*dt) );
 	this.x += this.vx * dt;
     this.y += this.vy * dt;
 }
@@ -208,6 +210,7 @@ Sphere.prototype.timeToHit = function(other) {
  * @param other
  */
 Sphere.prototype.bounceOff = function(other) {
+    console.log("Bounce off " + this + " and " + other);
     var dx = other.x - this.x;
     var dy = other.y - this.y;
     var dvx = other.vx - this.vx;
@@ -230,10 +233,12 @@ Sphere.prototype.bounceOff = function(other) {
     other.collision++;
 };
 Sphere.prototype.bounceOffVerticalWall = function(){
+    console.log("Bouncing off vertical wall " + this);
     this.vx = -this.vx ;
     this.collision++;
 };
 Sphere.prototype.bounceOffHorizontalWall = function(){
+    console.log("Bouncing off horizontal wall " + this);
     this.vy = -this.vy ;
     this.collision++;
 };
@@ -242,50 +247,65 @@ Sphere.prototype.bounceOffHorizontalWall = function(){
 function Event(sphereA, sphereB, time,duration){
 	var a = sphereA;
 	var b = sphereB;
-	this.time = time;
+	var time = time;
 	var duration = duration;
 	var collisionA = 0;
 	var collisionB = 0;
+    var type;
 	if (sphereA !== null) collisionA = sphereA.collision;
 	if (sphereB !== null) collisionB = sphereB.collision;
 
-	that = this;
-	
-	if (sphereA  && sphereB ) 	this.type = Event.TYPE_SPHERE;
-	else if(sphereA) this.type = Event.TYPE_VERTICAL;
-	else if(sphereB) this.type = Event.TYPE_HORIZONTAL;
-	// We need a min priority queue ie : min valuee on top of the heap.
-	this.compareTo = function(other) {
-        if (time < other.time) return 1;
-		else if (time === other.time) return 0;
-		else return -1;
-    };
-	this.doBounce = function(){
-		if (that.type == Event.TYPE_SPHERE) a.bounceOff(b);
-		else if (that.type == Event.TYPE_VERTICAL) a.bounceOffVerticalWall();
-		else if (that.type == Event.TYPE_HORIZONTAL) b.bounceOffHorizontalWall();
-		else throw new Error("No sphere in this event !");
-	};
+	if (sphereA  && sphereB ) 	{
+        type = Event.TYPE_SPHERE;
+        console.log("New event of type TYPE_SPHERE");
+    }
+	else if(sphereA) {
+        type = Event.TYPE_VERTICAL;
+        console.log("New event of type TYPE_VERTICAL");
+    }
+	else if(sphereB) {
+        type = Event.TYPE_HORIZONTAL;
+        console.log("New event of type TYPE_HORIZONTAL");
+    } else {
+        throw new Error("Unable to set a type to the event.");
+    }
+    this.getTime = function(){return time;};
+    this.getType = function(){return type;};
 	this.getVertical =function(){ return a;};
 	this.getHorizontal =function(){ return b;};
+    this.getVerticalCollision = function(){ return collisionA;};
+    this.getHorizontalCollision = function(){ return collisionB;}
 	this.getDuration =function(){ return duration;};
-	this.isValid = function(){
-		var result = false;
-		// If the number of collisions has changed > the event is no more valid
-		if (a != null)
-			result = result || a.collision == collisionA;
-		if (b != null)
-			result = result || b.collision == collisionB;
-			
-		return result;
-	};
-	this.toString = function(){
-		return "Event{"+that.type+"} [" + time +"] a="+a+" ; b="+b;
-	};
 }
 Event.TYPE_SPHERE=0;
 Event.TYPE_VERTICAL=1;
 Event.TYPE_HORIZONTAL=2;
+
+// We need a min priority queue ie : min valuee on top of the heap.
+Event.prototype.compareTo = function(other) {
+    if (this.getTime() < other.getTime()) return 1;
+    else if (this.getTime() === other.getTime()) return 0;
+    else return -1;
+};
+Event.prototype.toString = function(){
+    return "Event{"+this.getType()+"} [" + this.getTime() +"] a="+this.getVertical()+" ; b="+this.getHorizontal();
+};
+Event.prototype.doBounce = function(){
+    if (this.getType() == Event.TYPE_SPHERE) this.getVertical().bounceOff(this.getHorizontal());
+    else if (this.getType() == Event.TYPE_VERTICAL) this.getVertical().bounceOffVerticalWall();
+    else if (this.getType() == Event.TYPE_HORIZONTAL) this.getHorizontal().bounceOffHorizontalWall();
+    else throw new Error("No sphere in this event !");
+};
+Event.prototype.isValid = function(){
+    var result = false;
+    // If the number of collisions has changed > the event is no more valid
+    if (this.getVertical() != null)
+        result = result || this.getVertical().collision == this.getVerticalCollision();
+    if (this.getHorizontal() != null)
+        result = result || this.getHorizontal().collision == this.getHorizontalCollision();
+
+    return result;
+};
 
 /** The collision manager **/
 function CollisionManager(spheres){
@@ -299,6 +319,7 @@ function CollisionManager(spheres){
 	console.log("Building a CM with "+size+" spheres : " + spheres);
 	/** Predicts all the events for a given sphere **/
 	this.predict = function(sphereA , t) {
+        console.log("Predict future of "+ sphereA + " at time " + t);
 		for (var i=0 ; i< size ; i++) {
 			sphereB = spheres[i];
 			console.log("Collision "+sphereA+"--"+sphereB);
@@ -326,20 +347,23 @@ function CollisionManager(spheres){
 	};
 	this.nextEvent = function(){
 		next = events.DelMax();
+        console.log("Next event : " + next  );
 		while (!next.isValid()){
 			next = events.DelMax();
+            console.log("[while] Next event : " + next );
 		}
 		return next;
 	};
 	this.resolveEvent = function(event){
 		time += event.getDuration();
+        console.log("Resolving event " + event + " at time " + time);
 		event.doBounce();
-		if (event.type == Event.TYPE_SPHERE) {
+		if (event.getType() == Event.TYPE_SPHERE) {
 			that.predict(event.getVertical(),time);
 			that.predict(event.getHorizontal(),time);
-		} else if (event.type == Event.TYPE_VERTICAL) {
+		} else if (event.getType() == Event.TYPE_VERTICAL) {
 			that.predict(event.getVertical(),time);
-		} else if (event.type == Event.TYPE_HORIZONTAL) {
+		} else if (event.getType() == Event.TYPE_HORIZONTAL) {
 			that.predict(event.getHorizontal(),time);
 		}
 	};
