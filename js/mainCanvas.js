@@ -33,7 +33,10 @@ window.onload = function()
 			CM.predict(spheres[i],0);
 		}
 		$('body').prepend(CM.printable());
+		console.log("****************************");
 		console.log("END Sphere 1 & 2 in CM");
+		console.log("****************************");
+
 		// return;
 		var count=0;
 		while (count<2) {
@@ -49,7 +52,6 @@ window.onload = function()
 				spheres[i].Move(next.getDuration());
 				spheres[i].Draw(context);
             }
-			setTimeout(this,10000);
 		}
     $('body').append(CM.printable());
 		var myInterval = setInterval(animate(100000), STATIC_VALUES.DT*1000);
@@ -88,7 +90,7 @@ o------> x
 \/y
 */
 function StaticValues(canvas) {
-	this.BORDER = 20;
+	this.BORDER = 0;
 	this.MIN_X_COORD = this.BORDER;
 	this.MIN_Y_COORD = this.BORDER;
 	this.MAX_X_COORD = canvas.width - this.BORDER;
@@ -132,9 +134,10 @@ function Sphere(radius, mass, x , y , vx , vy , r , g ,b){
 	}
 }
 Sphere.prototype.Move = function(dt) {
-    console.log("moving particule " + this +"during dt="+dt+ " dx="+ (this.vx*dt) + " vy="+(this.vy*dt) );
+    console.log("moving particule " + this +"during dt="+dt+ " dx="+ (this.vx*dt) + " dy="+(this.vy*dt) );
 	this.x += this.vx * dt;
     this.y += this.vy * dt;
+	console.log("New status " + this);
 }
 Sphere.prototype.Draw = function(context){
 	context.fillStyle = this.color;
