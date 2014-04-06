@@ -23,7 +23,7 @@ window.onload = function()
         for (var i=0 ; i< 50 ; i++ ) {
             allSpheres[i] = new Sphere(2*i,1,50+2*i ,300 -3*i,0.1,0.15,3*(i%3),3*((i+1)%3)  ,3*((i+2)%3));
         }
-		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.01,.01,255,0  ,0);
+		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.1,0.1,255,0  ,0);
 		
 		// step = function (dt) {
 			// context.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
@@ -53,8 +53,10 @@ window.onload = function()
 
 		// return;
 		var count=0;
-		doNext = function () {CM.resolveEvent(CM.nextEvent());};
-		while (count<2) {
+		var doNext = function () {CM.resolveEvent(CM.nextEvent());};
+        doNext();
+		return;
+        while (count<2) {
 			console.log("Step "+count++);
 			// Nearest event in time
 			next = CM.nextEvent();
@@ -118,7 +120,7 @@ function StaticValues(canvas) {
 	/** 1 unit of space = 10 px **/
 	this.UNIT_SPACE_TO_PX = 10;
 	/** dt **/
-	this.DT = 1/80 // in s
+	this.DT = 1/200 // in s
     /** Simulation vars **/
     this.INFINITE = 999999999;
 	
@@ -173,11 +175,15 @@ Sphere.prototype.Draw = function(context){
 
 Sphere.prototype.TimeToHitVerticalWall = function(){
     if (this.vx > 0) {
+        // already out (possible if dt too big compare to vx)
+        if (this.x >= STATIC_VALUES.MAX_X - this.radius) {this.x = STATIC_VALUES.MAX_X - this.radius;}
 		time = (STATIC_VALUES.MAX_X - this.radius - this.x) / this.vx;
 		console.log("[vx="+this.vx+">0] "+this.x+" - "+this.radius+" return "+ time);
 		return time;
     }
 	else if (this.vx < 0) {
+        // already out (possible if dt too big compare to vx)
+        if (this.x <= STATIC_VALUES.MIN_X + this.radius) {this.x = STATIC_VALUES.MIN_X + this.radius;}
 		time = (this.x-this.radius-STATIC_VALUES.MIN_X) / -this.vx;
 		console.log("[vx="+this.vx+"<0]  "+this.x+" - "+this.radius+" return "+ time);
 		return time;
@@ -189,11 +195,14 @@ Sphere.prototype.TimeToHitVerticalWall = function(){
 };
 Sphere.prototype.TimeToHitHorizontalWall = function(){
     if (this.vy > 0) {
+        // already out (possible if dt too big compare to vx)
+        if (this.y >= STATIC_VALUES.MAX_Y - this.radius) {this.y = STATIC_VALUES.MAX_Y - this.radius;}
 		time=(STATIC_VALUES.MAX_Y - this.radius - this.y) / this.vy;
 		console.log("[vy="+this.vy+">0]  "+this.y+" - "+this.radius+" return "+time);
 		return time;
     }
 	else if (this.vy < 0) {
+        if (this.y <= STATIC_VALUES.MIN_Y + this.radius) {this.y = STATIC_VALUES.MIN_Y + this.radius;}
 		time = (this.y - this.radius - STATIC_VALUES.MIN_Y) / -this.vy
 		console.log("[vy="+this.vy+"<0]  "+this.y+" - "+this.radius+" return "+ time);
 		return time;
@@ -273,7 +282,7 @@ Sphere.prototype.bounceOffHorizontalWall = function(){
 };
 
 /** The event object **/
-function Event(sphereA, sphereB, t,dur){
+function Event(sphereA, sphereB, t, dur){
 	var a = sphereA;
 	var b = sphereB;
 	var time = t;
@@ -317,7 +326,7 @@ Event.prototype.compareTo = function(other) {
     else return -1;
 };
 Event.prototype.toString = function(){
-    return "Event{"+this.getType()+"} [" + this.getTime() +"] a="+this.getVertical()+" ; b="+this.getHorizontal();
+    return "Event{"+this.getType()+"-"+this.isValid()+"} [" + this.getTime() +"] a="+this.getVertical()+" ; b="+this.getHorizontal();
 };
 /** update speeds **/
 Event.prototype.doBounce = function(){
@@ -356,7 +365,7 @@ function CollisionManager(sphereList){
 	var size = spheres.length;
 	var that = this;
 	var time=0;
-	
+    this.SYNC_ANIM = false;
 	console.log("Building a CM with "+size+" spheres : " + spheres);
 	this.getSize = function() { return size;};
 	this.getEvents = function() { return events;};
@@ -425,13 +434,18 @@ CollisionManager.prototype.resolveEvent = function(event){
 	} else if (event.getType() == Event.TYPE_HORIZONTAL) {
 		this.predict(event.getHorizontal(),this.getTime());
 	}
+    // TODO BLOQUANT !!!
+    while (this.SYNC_ANIM) {}
+    this.SYNC_ANIM=false;
+    CM.resolveEvent(CM.nextEvent());
 };
+CollisionManager.prototype.SYNC_ANIMATION = function () { this.SYNC_ANIM = true; }
 CollisionManager.prototype.unitStepMove = function(duration){
-	var _this = this; // a copy of the context before the drawing. Sphere are not saved in their position. // TODO Hard rework
+	var _this = this; // a copy of the context before the drawing. Sphere positions are not saved. // TODO Rework ?
 	var last_progress=0;
 	return function(progress){
 		dprogress= progress - last_progress;
-		//console.log("Step move on : " + _this.getSpheres() + " with progress="+progress);
+		console.log("Step move on : " + _this.getSpheres() + " with progress="+progress+ " last " + last_progress + " and diff:"+dprogress);
 		STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
 		InitBackground(STATIC_VALUES.CONTEXT);
 		for (var i=0 ; i< _this.getSpheres().length ; i++ ) {
@@ -445,8 +459,8 @@ CollisionManager.prototype.moveSpheres = function(event) {
 	delay = STATIC_VALUES.DT*1000 // unit of anim is the ms
 	duration = event.getDuration() * 1000 // unit of anim is the ms
 	console.log("Animation : " + delay + "ms , dur="+duration+ "ms. Event : " + event);
-	linearMove(this.unitStepMove(duration) , delay ,duration , doNext);
-	console.log("Event after animation " + event);
+	linearMove(this.unitStepMove(duration) , delay ,duration , this.SYNC_ANIMATION);
+	//console.log("Event after animation " + event);
 };
 // CollisionManager.prototype.nextEvent = function(){
 	// next = events.DelMax().getValue();
@@ -472,8 +486,8 @@ function rgb(r,g,b) {
 }
 // Result between 0 and 1
 function normalizedXDistance(distance){
-	return distance * (STATIC_VALUES.MAX_X_COORD - STATIC_VALUES.MIN_X_COORD)
+	return distance * (STATIC_VALUES.MAX_X_COORD - STATIC_VALUES.MIN_X_COORD)/(STATIC_VALUES.MAX_X-STATIC_VALUES.MIN_X);
 }
 function normalizedYDistance(distance){
-	return distance * (STATIC_VALUES.MAX_Y_COORD - STATIC_VALUES.MIN_Y_COORD)
+	return distance * (STATIC_VALUES.MAX_Y_COORD - STATIC_VALUES.MIN_Y_COORD) / (STATIC_VALUES.MAX_Y-STATIC_VALUES.MIN_Y);
 }
