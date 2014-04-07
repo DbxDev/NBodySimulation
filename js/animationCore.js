@@ -13,7 +13,7 @@ function animate( options ) {
 	var start = new Date();
 	var handler = setInterval( function(){ 
 		var timePassed = new Date() - start;
-        console.log("Timepassed : " + timePassed);
+        // console.log("Timepassed : " + timePassed);
 		var progress = timePassed / options.duration;
 		if (progress>1) progress = 1 ;
 		
