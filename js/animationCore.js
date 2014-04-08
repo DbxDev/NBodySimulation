@@ -27,7 +27,8 @@ function animate( options ) {
 		
 		if (progress == 1) {
 			clearInterval(handler); // end animation
-			options.callback();
+			if (options.callback)
+				options.callback();
 		}
 		
 	} , options.delay || 10 ) // 10 ms default value
@@ -45,3 +46,101 @@ function linearMove(step, delay , duration , callback) {
 	};
 	animate(options);
 };
+function AnimationConstants(){}
+AnimationConstants.IDLE_TIME = 10 ; // in ms
+AnimationConstants.MAX_FPS = 60; // frames per second
+AnimationConstants.PERIOD_FPS = 1/AnimationConstants.MAX_FPS * 1000; // min time in ms between to frame
+
+
+function AnimationManager() {
+	this.events = new Queue(); // a queue of event to draw
+	this.spheres = new Array();
+}
+AnimationManager.prototype.init = function(spheres){
+	for (i=0 ; i<spheres.length ; i++)
+		this.spheres[i] = spheres[i].clone();
+		
+	console.log("Initialization complete. Number of elements : " + this.spheres.length);
+};
+AnimationManager.prototype.startAnimation = function () {
+	// Pop an event or wait until one is available
+	handler=setInterval( this.animateEvent(), AnimationConstants.PERIOD_FPS || 1/25*1000);
+};
+AnimationManager.prototype.animateEvent = function () {
+	var AM = this;
+	return function(){
+	nextAE = AM.events.pop();
+	if (!nextAE)
+		return;
+
+	// update parameters ?
+	AM.updateFromEvent(nextAE);
+	// do animation
+	linearMove(AM.unitStepMove(nextAE.duration) , AnimationConstants.PERIOD_FPS ,nextAE.duration);
+	};
+};
+AnimationManager.prototype.updateFromEvent = function(aEvent) {
+	// update speeds if needed
+	if (aEvent.sphereA) {
+		this.spheres[aEvent.sphereA.id].vx = aEvent.sphereA.vx;
+		this.spheres[aEvent.sphereA.id].vy = aEvent.sphereA.vy;
+	}
+	if (aEvent.sphereB) {
+		this.spheres[aEvent.sphereB.id].vx = aEvent.sphereB.vx;
+		this.spheres[aEvent.sphereB.id].vy = aEvent.sphereB.vy;
+	}
+};
+AnimationManager.prototype.addEvent = function (duration , sphereA , sphereB) {
+	this.events.push(new AnimationEvent(duration, sphereA, sphereB));
+};
+AnimationManager.prototype.unitStepMove = function(duration){
+	var AM = this; // a copy of the context before the drawing. Sphere positions are not saved. // TODO Rework ?
+	var last_progress=0;
+	var total_duration = 0;
+	return function(progress){
+		dprogress= progress - last_progress;
+		// ////console.log("Step move on : " + AM.getSpheres() + " with progress="+progress+ " last " + last_progress + " and diff:"+dprogress);
+		STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
+		InitBackground(STATIC_VALUES.CONTEXT);
+		for (var i=0 ; i< AM.spheres.length ; i++ ) {
+			AM.spheres[i].Move(dprogress*duration/1000); // need a time in second
+			AM.spheres[i].Draw(STATIC_VALUES.CONTEXT);
+		}
+		last_progress=progress;
+		total_duration+=dprogress*duration/1000;
+		//if (progress == 1) console.log("Total duration : " + total_duration + " total move dx="+ (AM.getSpheres()[0].vx * total_duration) +"dy="+ (AM.getSpheres()[0].vy * total_duration));
+	};
+};
+
+function AnimationEvent(duration, sphereA, sphereB) {
+	this.duration = duration;
+	this.sphereA = sphereA;
+	this.sphereB = sphereB;
+}
+
+
+function InitBackground(context){
+// Draw the borders
+	context.beginPath();
+	context.moveTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
+	context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MAX_Y_COORD);
+	context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MAX_Y_COORD);
+	context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MIN_Y_COORD);
+	context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
+	context.stroke(); // draw the lines only
+	context.closePath();
+}
+
+// unit test :
+function test(){
+	AM = new AnimationManager();
+	var size = 10;
+	var spheres = new Array();
+	for (i=0 ; i<size ; i++) {
+		spheres[i] = new Sphere(i,i,i,i,i,i,i,i,i);
+	}
+	AM.init(spheres);
+	console.log("Result : " + AM.spheres);
+	console.log("End of AnimationCore test");
+};
+// test();

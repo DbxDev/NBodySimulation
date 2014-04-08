@@ -21,16 +21,16 @@ window.onload = function()
         allSpheres = new Array();
 
  /*       for (var i=0 ; i< 10 ; i++ ) {
-            allSpheres[i] = new Sphere(0.005*i+0.01,1,i*0.1 ,i*0.1 ,0.01*i,0.15*i,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+            allSpheres[i] = new Sphere(i,0.005*i+0.01,1,i*0.1 ,i*0.1 ,0.01*i,0.15*i,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
             allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
         */
         R = 0.01;
         for (var i=0 ; i< 30 ; i++ ) {
-            allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+            allSpheres[i] = new Sphere(i,R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
             allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
-		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.1,0.1,255,0  ,0);
+		sphere1 = new Sphere(1,0.01,1,0.6 ,0.5 ,0.1,0.1,255,0  ,0);
 
 		// step = function (dt) {
 			// context.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
@@ -44,7 +44,7 @@ window.onload = function()
 		// AnimationCore.linearMove(step , 10 , 10000);
 		// return;
 		
-        sphere2 = new Sphere(0.05,1,0.2 ,0.8 ,-0.2,-0.1  ,0  ,255,0);
+        sphere2 = new Sphere(2,0.05,1,0.2 ,0.8 ,-0.2,-0.1  ,0  ,255,0);
 		////console.log("BEGIN Sphere 1 & 2 in CM. Infinite value set to : " + STATIC_VALUES.INFINITE);
 		spheres = new Array(sphere1, sphere2);
 		// spheres = new Array(sphere1);
@@ -60,6 +60,12 @@ window.onload = function()
 		//var doNext = function () {CM.resolveEvent(CM.nextEvent());};
 		
        CM.resolveEvent(CM.nextEvent());
+	   // var test = setInterval(function(){ console.log(count++);}, 500);
+	   var handler = setInterval(function() { 
+			CM.doNext();
+			console.log(count++);
+		} , 400);
+	   /*
 		return;
         while (count<2) {
 			////console.log("Step "+count++);
@@ -75,8 +81,8 @@ window.onload = function()
     $('body').append(CM.printable());
 		var myInterval = setInterval(animate(100000), STATIC_VALUES.DT*1000);
 		
-		/** animation function **/
-		function animate(duration){
+	*/	/** animation function **/
+	 /*	function animate(duration){
 			
 			// timeElapse+=STATIC_VALUES.DT;
 			// if (timeElapse >= duration) return;
@@ -99,6 +105,7 @@ window.onload = function()
 			// $('span#valueDuration').replaceWith(timeElapse);
 			// ////console.log("Time elapse : " + timeElapse);
         }
+		*/
 }
 
 /* convention
@@ -133,159 +140,17 @@ function StaticValues(canvas) {
 	////console.log("Static values instanciated.")
 }
 
-function InitBackground(context){
-// Draw the borders
-	context.beginPath();
-	context.moveTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
-	context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MAX_Y_COORD);
-	context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MAX_Y_COORD);
-	context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MIN_Y_COORD);
-	context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
-	context.stroke(); // draw the lines only
-	context.closePath();
-}
-/*
- Object that represents an hard sphere
-*/
-function Sphere(radius, mass, x , y , vx , vy , r , g ,b){
-	this.radius = radius;
-	this.mass = mass;
-	this.x= x;
-	this.y = y;
-	this.vx = vx;
-	this.vy = vy;
-	this.color = rgb(r,g,b);
-    this.collision = 0; // number of collisions
-}
-Sphere.prototype.toString = function(){
-		return "{Sphere R="+this.radius+" m="+this.mass+" (x,y)="+this.x+","+this.y+" (vx,vy)="+this.vx+","+this.vy+"}";
-};
-Sphere.prototype.Move = function(dt) {
-    // ////console.log("moving particule " + this +"during dt="+dt+ " dx="+ (this.vx*dt) + " dy="+(this.vy*dt) );
-	this.x += (this.vx * dt);
-    this.y += (this.vy * dt);
-	// ////console.log("New status " + this);
-};
-Sphere.prototype.Draw = function(context){
-	context.fillStyle = this.color;
-	context.beginPath(); 
-	//////console.log("Drawing : (x,y)=(" + normalizedXDistance(this.x)+","+ normalizedYDistance(this.y) + ")");
-	context.arc(normalizedXDistance(this.x), normalizedYDistance(this.y), normalizedXDistance(this.radius), 0, Math.PI*2); // x,y,radius,starting angle, ending angle [, option clockwise]
-	context.fill();
-	context.closePath();
-};
-/**
- * For more info about this physical part, see the excellent Booksite :
- * http://algs4.cs.princeton.edu/61event/Particle.java.html
- */
-
-Sphere.prototype.TimeToHitVerticalWall = function(){
-    if (this.vx > 0) {
-        // already out (possible if dt too big compare to vx)
-        if (this.x >= STATIC_VALUES.MAX_X - this.radius) {this.x = STATIC_VALUES.MAX_X - this.radius;}
-		time = (STATIC_VALUES.MAX_X - this.radius - this.x) / this.vx;
-		////console.log("[vx="+this.vx+">0] "+this.x+" - "+this.radius+" return "+ time);
-		return time;
-    }
-	else if (this.vx < 0) {
-        // already out (possible if dt too big compare to vx)
-        if (this.x <= STATIC_VALUES.MIN_X + this.radius) {this.x = STATIC_VALUES.MIN_X + this.radius;}
-		time = (this.x-this.radius-STATIC_VALUES.MIN_X) / -this.vx;
-		////console.log("[vx="+this.vx+"<0]  "+this.x+" - "+this.radius+" return "+ time);
-		return time;
-    }
-	else {
-		////console.log("Else case return "+ STATIC_VALUES.INFINITE);
-		return STATIC_VALUES.INFINITE;
-	}
-};
-Sphere.prototype.TimeToHitHorizontalWall = function(){
-    if (this.vy > 0) {
-        // already out (possible if dt too big compare to vx)
-        if (this.y >= STATIC_VALUES.MAX_Y - this.radius) {this.y = STATIC_VALUES.MAX_Y - this.radius;}
-		time=(STATIC_VALUES.MAX_Y - this.radius - this.y) / this.vy;
-		////console.log("[vy="+this.vy+">0]  "+this.y+" - "+this.radius+" return "+time);
-		return time;
-    }
-	else if (this.vy < 0) {
-        if (this.y <= STATIC_VALUES.MIN_Y + this.radius) {this.y = STATIC_VALUES.MIN_Y + this.radius;}
-		time = (this.y - this.radius - STATIC_VALUES.MIN_Y) / -this.vy
-		////console.log("[vy="+this.vy+"<0]  "+this.y+" - "+this.radius+" return "+ time);
-		return time;
-    }
-	else {
-		////console.log("Else case return "+ STATIC_VALUES.INFINITE);
-		return STATIC_VALUES.INFINITE;
-	}
-};
-/**
- * Time to hit a particule
- * @param other
- * @returns {number}
- */
-Sphere.prototype.timeToHit = function(other) {
-    if (this == other) return STATIC_VALUES.INFINITE;
-    var dx = other.x - this.x;
-    var dy = other.y - this.y;
-    var dvx = other.vx - this.vx;
-    var dvy = other.vy - this.vy;
-    var dvdr = dx * dvx + dy * dvy;
-	////console.log(dx+" "+dy+" " + dvx+ " " + dvy + " " +dvdr);
-    if (dvdr > 0) {
-		////console.log("[dvdr="+dvdr+" > 0] return "+ STATIC_VALUES.INFINITE);
-		return STATIC_VALUES.INFINITE;
-    }
-	var dvdv = dvx*dvx + dvy*dvy;
-    var drdr = dx*dx + dy*dy;
-    var sigma = this.radius + other.radius;
-    var d = dvdr*dvdr - dvdv * (drdr - sigma*sigma);
-    if (d<=0) {
-		////console.log("[d="+d+"<0]"+ STATIC_VALUES.INFINITE); 
-		return STATIC_VALUES.INFINITE;
-	}
-	
-	////console.log("Time to hit between : "+ this + " and " + other + " is " + (- (dvdr + Math.sqrt(d)) / dvdv) + " build with "+dvdr+" " + Math.sqrt(d) + " " + dvdv);
-    return -(dvdr + Math.sqrt(d)) / dvdv;
-};
-/**
- * Bouncing on an other particle
- * @param other
- */
-Sphere.prototype.bounceOff = function(other) {
-    ////console.log("Bounce off " + this + " and " + other);
-    var dx = other.x - this.x;
-    var dy = other.y - this.y;
-    var dvx = other.vx - this.vx;
-    var dvy = other.vy - this.vy;
-    var dvdr = dx * dvx + dy * dvy;
-    var dist = this.radius + other.radius;
-
-    // Normal force
-    var F = 2 * this.mass * other.mass * dvdr / ((this.mass + other.mass) * dist);
-    var fx = F * dx / dist;
-    var fy = F * dy / dist;
-
-    // new velocities
-    this.vx += fx / this.mass;
-    this.vy += fy / this.mass;
-    other.vx -= fx / other.mass;
-    other.vy -= fy / other.mass;
-
-    this.collision++;
-    other.collision++;
-};
-Sphere.prototype.bounceOffVerticalWall = function(){
-    ////console.log("BEGIN Bouncing off vertical wall " + this);
-    this.vx *= -1 ;
-    this.collision++;
-	////console.log("END Bouncing off vertical wall " + this+ " >>> " + this.vx);
-};
-Sphere.prototype.bounceOffHorizontalWall = function(){
-    ////console.log("BEGIN Bouncing off horizontal wall " + this);
-    this.vy *= -1 ;
-    this.collision++;
-	////console.log("END Bouncing off horizontal wall " + this + " >>> " + this.vy);
-};
+// function InitBackground(context){
+//  // Draw the borders
+	// context.beginPath();
+	// context.moveTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
+	// context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MAX_Y_COORD);
+	// context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MAX_Y_COORD);
+	// context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MIN_Y_COORD);
+	// context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
+	// context.stroke(); // draw the lines only
+	// context.closePath();
+// }
 
 /** The event object **/
 function Event(sphereA, sphereB, t){
@@ -370,9 +235,11 @@ function CollisionManager(sphereList){
 	if (STATIC_VALUES == undefined) throw new Error("STATIC_VALUES instance not set.");
 	var events = new PriorityQueue();
 	var spheres = sphereList;
+	
 	var size = spheres.length;
 	var that = this;
 	var time=0;
+	this.AM = new AnimationManager();
     this.SYNC_ANIM = false;
 	////console.log("Building a CM with "+size+" spheres : " + spheres);
 	this.getSize = function() { return size;};
@@ -389,6 +256,9 @@ function CollisionManager(sphereList){
 CollisionManager.prototype.init = function() {
     for (i=0 ; i<this.getSize() ; i++)
         this.predict(this.getSpheres()[i],0);
+	
+	this.AM.init(this.getSpheres());
+	this.AM.startAnimation();
 }
 /** Predicts all the events for a given sphere **/
 CollisionManager.prototype.predict = function(sphereA , t) {
@@ -433,10 +303,13 @@ CollisionManager.prototype.resolveEvent = function(event){
 	// STATIC_VALUES.COUNT++;
 	// if (STATIC_VALUES.COUNT > 3)
 		// throw new Error("ENOUGH");
-	
-	
+
 	////console.log("Resolving event " + event + " at time " + this.getTime() );
-	// VISUALY update positions and draw
+	
+	// Add a new drawing event
+	var duration = this.getEventRealDuration(event) ; // in s
+	this.AM.addEvent(duration* 1000 , event.getVertical() , event.getHorizontal() );
+	// update simulation position
 	this.moveSpheres(event);
 	// compute new position
 	//event.moveSpheres();
@@ -465,21 +338,25 @@ CollisionManager.prototype.addFollowingEvents = function(event,callback) {
 	if (callback) callback();
 };
 
-doNext = function (CM , event) {
-	
-	return function() {
-		event.doBounce();
-		// queue new events.
-		CM.updateTime( CM.getEventRealDuration(event) );
-		CM.addFollowingEvents(event);
-		CM.resolveEvent(CM.nextEvent());
-	};
+CollisionManager.prototype.doNext = function () {
+	CM = this;
+	//return function(){
+	var event = CM.nextEvent()
+	event.doBounce();
+	// queue new events.
+	CM.updateTime( CM.getEventRealDuration(event) );
+	CM.addFollowingEvents(event);
+	CM.resolveEvent(event);
+	//}
 }
 CollisionManager.prototype.moveSpheres = function(event) {
-	delay = STATIC_VALUES.DT*1000 // unit of anim is the ms
-	duration = CM.getEventRealDuration(event)* 1000 // unit of anim is the ms
+	for (var i=0 ; i< this.getSpheres().length ; i++ ) {
+			this.getSpheres()[i].Move(this.getEventRealDuration(event));
+	}
+	// delay = STATIC_VALUES.DT*1000 // unit of anim is the ms
+	// duration = CM.getEventRealDuration(event)* 1000 // unit of anim is the ms
 	////console.log("Animation : " + delay + "ms , dur="+duration+ "ms. Event : " + event);
-	linearMove(this.unitStepMove(duration) , delay ,duration , doNext(this,event));
+	// linearMove(this.unitStepMove(duration) , delay ,duration , doNext(this,event));
 	//////console.log("Event after animation " + event);
 };
 
@@ -519,10 +396,7 @@ CollisionManager.prototype.unitStepMove = function(duration){
 		// this.predict(event.getHorizontal(),this.time);
 	// }
 // };
-/** tools **/
-function rgb(r,g,b) {
-	return "rgb("+r+","+g+","+b+")";
-}
+
 // Result between 0 and 1
 function normalizedXDistance(distance){
 	return distance * (STATIC_VALUES.MAX_X_COORD - STATIC_VALUES.MIN_X_COORD)/(STATIC_VALUES.MAX_X-STATIC_VALUES.MIN_X);
