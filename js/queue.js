@@ -15,9 +15,9 @@ Queue.prototype.push = function (node) {
 };
 Queue.prototype.pop = function() {
 	if (this.size == 0)
-		return null;
+		throw new Error("Pop on empty queue.");
 	
-	first = this.first;
+	var first = this.first;
 	this.first = first.next;
 	this.size--;
 	return first;

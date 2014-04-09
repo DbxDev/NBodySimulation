@@ -66,17 +66,20 @@ AnimationManager.prototype.startAnimation = function () {
 	// Pop an event or wait until one is available
 	handler=setInterval( this.animateEvent(), AnimationConstants.PERIOD_FPS || 1/25*1000);
 };
+
 AnimationManager.prototype.animateEvent = function () {
 	var AM = this;
+    var count=0;
 	return function(){
-	nextAE = AM.events.pop();
-	if (!nextAE)
-		return;
+        console.log("Anim "+count++ + AM.events.first);
+        if (AM.events.isEmpty())
+            return;
 
-	// update parameters ?
-	AM.updateFromEvent(nextAE);
-	// do animation
-	linearMove(AM.unitStepMove(nextAE.duration) , AnimationConstants.PERIOD_FPS ,nextAE.duration);
+        nextAE = AM.events.pop().value;
+	    // update parameters ?
+    	AM.updateFromEvent(nextAE);
+    	// do animation
+    	linearMove(AM.unitStepMove(nextAE.duration) , AnimationConstants.PERIOD_FPS ,nextAE.duration);
 	};
 };
 AnimationManager.prototype.updateFromEvent = function(aEvent) {
@@ -91,7 +94,8 @@ AnimationManager.prototype.updateFromEvent = function(aEvent) {
 	}
 };
 AnimationManager.prototype.addEvent = function (duration , sphereA , sphereB) {
-	this.events.push(new AnimationEvent(duration, sphereA, sphereB));
+	var node = new Node(new AnimationEvent(duration, sphereA, sphereB));
+    this.events.push(node);
 };
 AnimationManager.prototype.unitStepMove = function(duration){
 	var AM = this; // a copy of the context before the drawing. Sphere positions are not saved. // TODO Rework ?
@@ -117,7 +121,9 @@ function AnimationEvent(duration, sphereA, sphereB) {
 	this.sphereA = sphereA;
 	this.sphereB = sphereB;
 }
-
+AnimationEvent.prototype.toString = function(){
+   return "Event ["+this.duration+"ms] "+ this.sphereA + " -- " + this.sphereB;
+};
 
 function InitBackground(context){
 // Draw the borders
