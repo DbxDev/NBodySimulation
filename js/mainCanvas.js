@@ -26,11 +26,11 @@ window.onload = function()
         }
         */
         R = 0.01;
-        for (var i=0 ; i< 30 ; i++ ) {
-            allSpheres[i] = new Sphere(i,R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+        for (var i=0 ; i< 50 ; i++ ) {
+            allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
             allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
-		sphere1 = new Sphere(1,0.01,1,0.6 ,0.5 ,0.1,0.1,255,0  ,0);
+		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.1,0.1,255,0,0,0);
 
 		// step = function (dt) {
 			// context.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
@@ -44,9 +44,10 @@ window.onload = function()
 		// AnimationCore.linearMove(step , 10 , 10000);
 		// return;
 		
-        sphere2 = new Sphere(2,0.05,1,0.2 ,0.8 ,-0.2,-0.1  ,0  ,255,0);
+        sphere2 = new Sphere(0.05,1,0.2 ,0.8 ,-0.2,-0.1  ,0  ,255,0,1);
 		////console.log("BEGIN Sphere 1 & 2 in CM. Infinite value set to : " + STATIC_VALUES.INFINITE);
 		spheres = new Array(sphere1, sphere2);
+		console.log(spheres[0] , spheres[1]);
 		// spheres = new Array(sphere1);
 		CM = new CollisionManager(allSpheres);
 		CM.init();
@@ -63,8 +64,7 @@ window.onload = function()
 	   // var test = setInterval(function(){ console.log(count++);}, 500);
 	   var handler = setInterval(function() { 
 			CM.doNext();
-			console.log(count++);
-		} , 400);
+		} , 10);
 	   /*
 		return;
         while (count<2) {
@@ -201,10 +201,13 @@ Event.prototype.toString = function(){
 };
 /** update speeds **/
 Event.prototype.doBounce = function(){
+	// console.log("BEFORE Bouncing " + this.getVertical() + " -- " + this.getHorizontal() );
     if (this.getType() == Event.TYPE_SPHERE) this.getVertical().bounceOff(this.getHorizontal());
     else if (this.getType() == Event.TYPE_VERTICAL) this.getVertical().bounceOffVerticalWall();
     else if (this.getType() == Event.TYPE_HORIZONTAL) this.getHorizontal().bounceOffHorizontalWall();
     else throw new Error("No sphere in this event !");
+	
+	// console.log("AFTER Bouncing " + this.getVertical() + " -- " + this.getHorizontal() );
 };
 
 // NON SENCE. We need to move all the spheres not only those of the event
@@ -240,19 +243,28 @@ function CollisionManager(sphereList){
 	var that = this;
 	var time=0;
 	this.AM = new AnimationManager();
-    this.SYNC_ANIM = false;
+    this.running = false;
 	////console.log("Building a CM with "+size+" spheres : " + spheres);
 	this.getSize = function() { return size;};
 	this.getEvents = function() { return events;};
 	this.getSpheres = function() { return spheres ;};
 	this.getTime = function() { return time ; };
-	this.setTime = function(t) { time = t; };
+	// this.setTime = function(t) { this.time = t; };
 	this.sizeEventList = function(){ return events.Size(); };
-	this.getEventRealDuration = function(event){return event.getTime()-time;}
+	this.setTime = function(t) {
+		console.log("Setting time to " + t);
+		time = t; 
+	};
 	this.printable = function() {
 		return events.printable();
 	};
 }
+
+CollisionManager.prototype.getEventRealDuration = function(event){
+	console.log("Event duration : " + event.getTime() +" - " + this.getTime() + " = " + (event.getTime()-this.getTime()));
+	return event.getTime()-this.getTime();
+};
+		
 CollisionManager.prototype.init = function() {
     for (i=0 ; i<this.getSize() ; i++)
         this.predict(this.getSpheres()[i],0);
@@ -308,22 +320,27 @@ CollisionManager.prototype.resolveEvent = function(event){
 	
 	// Add a new drawing event
 	var duration = this.getEventRealDuration(event) ; // in s
-	this.AM.addEvent(duration* 1000 , event.getVertical() , event.getHorizontal() );
-	// update simulation position
-	this.moveSpheres(event);
-	// compute new position
-	//event.moveSpheres();
-	// update speeds
 
+	// update simulation position
+	this.moveSpheres(duration);
+	event.doBounce();
+	this.updateTime( duration );
+	// queue new events.
+	CM.addFollowingEvents(event);
+	
+	// Send speed and duration infos to the drawing engine
+	var vertical = null , horizontal = null;
+	if (event.getVertical()) vertical = event.getVertical().clone();
+	if (event.getHorizontal()) horizontal = event.getHorizontal().clone();
+	this.AM.addEvent(duration* 1000 , vertical , horizontal );
 	
 };
 
-CollisionManager.prototype.SYNC_ANIMATION = function () { this.SYNC_ANIM = true; };
+CollisionManager.prototype.setEndRun = function () { this.running = false; };
 
 CollisionManager.prototype.updateTime = function(duration , callback) {
 	this.setTime(this.getTime() + duration);
-	if (callback)
-		callback();
+	if (callback) callback();
 };
 
 CollisionManager.prototype.addFollowingEvents = function(event,callback) {
@@ -340,19 +357,26 @@ CollisionManager.prototype.addFollowingEvents = function(event,callback) {
 
 CollisionManager.prototype.doNext = function () {
 	CM = this;
+	if (CM.running) return;
+	
+	CM.running = true;
+	
+	console.log("DoNext at time ["+ CM.getTime()+"]" );
 	//return function(){
-	var event = CM.nextEvent()
-	event.doBounce();
-	// queue new events.
-	CM.updateTime( CM.getEventRealDuration(event) );
-	CM.addFollowingEvents(event);
+	var event = CM.nextEvent();
+	// computing new 
 	CM.resolveEvent(event);
+	
+	
+	CM.running = false;
 	//}
 }
-CollisionManager.prototype.moveSpheres = function(event) {
+CollisionManager.prototype.moveSpheres = function(duration) {
+	// console.log("BEFORE Spheres states : " + this.getSpheres());
 	for (var i=0 ; i< this.getSpheres().length ; i++ ) {
-			this.getSpheres()[i].Move(this.getEventRealDuration(event));
+			this.getSpheres()[i].Move(duration);
 	}
+	// console.log("AFTER Spheres states : " + this.getSpheres());
 	// delay = STATIC_VALUES.DT*1000 // unit of anim is the ms
 	// duration = CM.getEventRealDuration(event)* 1000 // unit of anim is the ms
 	////console.log("Animation : " + delay + "ms , dur="+duration+ "ms. Event : " + event);
@@ -375,7 +399,7 @@ CollisionManager.prototype.unitStepMove = function(duration){
 		}
 		last_progress=progress;
 		total_duration+=dprogress*duration/1000;
-		//if (progress == 1) console.log("Total duration : " + total_duration + " total move dx="+ (_this.getSpheres()[0].vx * total_duration) +"dy="+ (_this.getSpheres()[0].vy * total_duration));
+		if (progress == 1) console.log("*********Total duration : " + total_duration + " total move dx="+ (_this.getSpheres()[0].vx * total_duration) +"dy="+ (_this.getSpheres()[0].vy * total_duration));
 	};
 };
 // CollisionManager.prototype.nextEvent = function(){

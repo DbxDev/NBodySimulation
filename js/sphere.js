@@ -1,14 +1,21 @@
 /*
  Object that represents an hard sphere
 */
-function Sphere(id,radius, mass, x , y , vx , vy , r , g ,b){
-	this.id = id;
+var lastID = 0;
+generateID = function(){
+	return lastID++;
+}
+function Sphere(radius, mass, x , y , vx , vy , r , g ,b , id){
+	// Except 0 we require an ID with a valid value
+	if (id !== 0  && !id) id = generateID();
+	this.id = id 
 	this.radius = radius;
 	this.mass = mass;
 	this.x= x;
 	this.y = y;
 	this.vx = vx;
 	this.vy = vy;
+	this.r = r ; this.g = g ; this.b = b
 	this.color = rgb(r,g,b);
     this.collision = 0; // number of collisions
 }
@@ -143,7 +150,7 @@ Sphere.prototype.bounceOffHorizontalWall = function(){
 };
 // clone with the same ID
 Sphere.prototype.clone = function() {
-	return new Sphere(this.id , this.radius, this.mass, this.x , this.y , this.vx , this.vy , this.r , this.g ,this.b);
+	return new Sphere(this.radius, this.mass, this.x , this.y , this.vx , this.vy , this.r , this.g ,this.b , this.id );
 };
 /** tools **/
 function rgb(r,g,b) {

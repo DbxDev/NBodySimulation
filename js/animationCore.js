@@ -27,8 +27,7 @@ function animate( options ) {
 		
 		if (progress == 1) {
 			clearInterval(handler); // end animation
-			if (options.callback)
-				options.callback();
+			if (options.callback) options.callback();
 		}
 		
 	} , options.delay || 10 ) // 10 ms default value
@@ -55,6 +54,7 @@ AnimationConstants.PERIOD_FPS = 1/AnimationConstants.MAX_FPS * 1000; // min time
 function AnimationManager() {
 	this.events = new Queue(); // a queue of event to draw
 	this.spheres = new Array();
+	// this.running = false;
 }
 AnimationManager.prototype.init = function(spheres){
 	for (i=0 ; i<spheres.length ; i++)
@@ -66,23 +66,42 @@ AnimationManager.prototype.startAnimation = function () {
 	// Pop an event or wait until one is available
 	handler=setInterval( this.animateEvent(), AnimationConstants.PERIOD_FPS || 1/25*1000);
 };
-
+AnimationManager.running = false;
+AnimationManager.setEndRun = function () { 
+	console.log("STOPING RUN...");
+	AnimationManager.running = false; 
+};
+AnimationManager.setRunning = function () { 
+	console.log("STARTING RUN...");
+	AnimationManager.running = true; 
+};
+AnimationManager.isRunning = function () { return AnimationManager.running; };
 AnimationManager.prototype.animateEvent = function () {
 	var AM = this;
     var count=0;
 	return function(){
-        console.log("Anim "+count++ + AM.events.first);
-        if (AM.events.isEmpty())
+		if (AnimationManager.isRunning()) return;
+		console.log("Anim "+count++ + " number of events #"+ AM.events.size );
+        if (AM.events.isEmpty()){
             return;
-
+		}
+		AnimationManager.setRunning();
         nextAE = AM.events.pop().value;
-	    // update parameters ?
-    	AM.updateFromEvent(nextAE);
-    	// do animation
-    	linearMove(AM.unitStepMove(nextAE.duration) , AnimationConstants.PERIOD_FPS ,nextAE.duration);
+		console.log("New event : " + nextAE);
+		
+		    	
+		// do animation
+    	linearMove(AM.unitStepMove(nextAE.duration) , AnimationConstants.PERIOD_FPS ,nextAE.duration , 
+			function(){ 
+				AM.updateFromEvent(nextAE); // update speeds as the event has a duration before a collision for the given sphere states
+	
+				AnimationManager.setEndRun(); // set animation complete
+				// console.log("Final state after animation : " + AM.spheres[0] + " -- " + AM.spheres[1]);
+			});
 	};
 };
 AnimationManager.prototype.updateFromEvent = function(aEvent) {
+	// console.log("UPDATE speeds : " + this.spheres[0] + " -- " + this.spheres[1] + " from event "+aEvent );
 	// update speeds if needed
 	if (aEvent.sphereA) {
 		this.spheres[aEvent.sphereA.id].vx = aEvent.sphereA.vx;
@@ -92,6 +111,8 @@ AnimationManager.prototype.updateFromEvent = function(aEvent) {
 		this.spheres[aEvent.sphereB.id].vx = aEvent.sphereB.vx;
 		this.spheres[aEvent.sphereB.id].vy = aEvent.sphereB.vy;
 	}
+	
+	// console.log("UPDATE COMPLETE new speeds : " + this.spheres[0] + " -- " + this.spheres[1] );
 };
 AnimationManager.prototype.addEvent = function (duration , sphereA , sphereB) {
 	var node = new Node(new AnimationEvent(duration, sphereA, sphereB));
@@ -112,7 +133,7 @@ AnimationManager.prototype.unitStepMove = function(duration){
 		}
 		last_progress=progress;
 		total_duration+=dprogress*duration/1000;
-		//if (progress == 1) console.log("Total duration : " + total_duration + " total move dx="+ (AM.getSpheres()[0].vx * total_duration) +"dy="+ (AM.getSpheres()[0].vy * total_duration));
+		if (progress == 1) console.log("Total duration : " + total_duration + " total move dx="+ (AM.spheres[0].vx * total_duration) +"dy="+ (AM.spheres[0].vy * total_duration));
 	};
 };
 
@@ -143,7 +164,7 @@ function test(){
 	var size = 10;
 	var spheres = new Array();
 	for (i=0 ; i<size ; i++) {
-		spheres[i] = new Sphere(i,i,i,i,i,i,i,i,i);
+		spheres[i] = new Sphere(i,i,i,i,i,i,i,i);
 	}
 	AM.init(spheres);
 	console.log("Result : " + AM.spheres);
