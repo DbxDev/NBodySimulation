@@ -5,25 +5,6 @@
 		- delta is a function used for non linear animation speed 
 		- step the function execute between each frame
 **/
-var fps = new FPS();
-function FPS () {
-	this.frames_displayed = 0;
-	this.overall_time_start = new Date();
-}
-FPS.prototype.countFps = function() {
-	fps.frames_displayed = 0 ;
-	var start = new Date();
-	var result;
-	setTimeout( function() {
-		current = new Date();
-		result =  1000 * fps.frames_displayed / (current - start)
-		fps.display();
-	} , 200);
-	return result;
-}
-FPS.prototype.display = function() {
-	$('span#fps').replaceWith('<span id="fps">'+fps.countFps() + ' fps</span>');
-}
 
 function AnimationCoreConstants() {};
 AnimationCoreConstants.LINEAR = function(p) { return p; };
@@ -45,7 +26,7 @@ function animate( options ) {
 
 		options.step(delta);
 		
-		fps.frames_displayed++;
+
 		
 		if (progress == 1) {
 			clearInterval(handler); // end animation
@@ -69,7 +50,7 @@ function linearMove(step, delay , duration , callback) {
 };
 function AnimationConstants(){}
 AnimationConstants.IDLE_TIME = 10 ; // in ms
-AnimationConstants.MAX_FPS = 60; // frames per second
+AnimationConstants.MAX_FPS = 120; // frames per second
 AnimationConstants.PERIOD_FPS = 1/AnimationConstants.MAX_FPS * 1000; // min time in ms between to frame
 
 
@@ -90,11 +71,11 @@ AnimationManager.prototype.startAnimation = function () {
 };
 AnimationManager.running = false;
 AnimationManager.setEndRun = function () { 
-	console.log("STOPING RUN...");
+	//console.log("STOPING RUN...");
 	AnimationManager.running = false; 
 };
 AnimationManager.setRunning = function () { 
-	console.log("STARTING RUN...");
+	//console.log("STARTING RUN...");
 	AnimationManager.running = true; 
 };
 AnimationManager.isRunning = function () { return AnimationManager.running; };
@@ -103,7 +84,7 @@ AnimationManager.prototype.animateEvent = function () {
     var count=0;
 	return function(){
 		if (AnimationManager.isRunning()) return;
-		console.log("Anim "+count++ + " number of events #"+ AM.events.size );
+		//console.log("Anim "+count++ + " number of events #"+ AM.events.size );
         if (AM.events.isEmpty()){
             return;
 		}
@@ -147,15 +128,19 @@ AnimationManager.prototype.unitStepMove = function(duration){
 	return function(progress){
 		dprogress= progress - last_progress;
 		// ////console.log("Step move on : " + AM.getSpheres() + " with progress="+progress+ " last " + last_progress + " and diff:"+dprogress);
-		STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
-		InitBackground(STATIC_VALUES.CONTEXT);
+		STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
+
+        var dt= dprogress*duration/1000;
 		for (var i=0 ; i< AM.spheres.length ; i++ ) {
-			AM.spheres[i].Move(dprogress*duration/1000); // need a time in second
-			AM.spheres[i].Draw(STATIC_VALUES.CONTEXT);
+			AM.spheres[i].Move(dt); // need a time in second
 		}
+        for (var i=0 ; i< AM.spheres.length ; i++ ) {
+            AM.spheres[i].Draw(STATIC_VALUES.CONTEXT);
+        }
+        FPS.frames_displayed++;
 		last_progress=progress;
-		total_duration+=dprogress*duration/1000;
-		if (progress == 1) console.log("Total duration : " + total_duration + " total move dx="+ (AM.spheres[0].vx * total_duration) +"dy="+ (AM.spheres[0].vy * total_duration));
+		//total_duration+=dprogress*duration/1000;
+		//if (progress == 1) console.log("Total duration : " + total_duration + " total move dx="+ (AM.spheres[0].vx * total_duration) +"dy="+ (AM.spheres[0].vy * total_duration));
 	};
 };
 
@@ -171,14 +156,31 @@ AnimationEvent.prototype.toString = function(){
 function InitBackground(context){
 // Draw the borders
 	context.beginPath();
-	context.moveTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
-	context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MAX_Y_COORD);
-	context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MAX_Y_COORD);
-	context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MIN_Y_COORD);
-	context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
+	context.moveTo(STATIC_VALUES.BORDER, STATIC_VALUES.BORDER);
+	context.lineTo(STATIC_VALUES.BORDER, STATIC_VALUES.CANVAS.height);
+	context.lineTo(STATIC_VALUES.CANVAS.width, STATIC_VALUES.CANVAS.height);
+	context.lineTo(STATIC_VALUES.CANVAS.width, STATIC_VALUES.BORDER);
+	context.lineTo(STATIC_VALUES.BORDER, STATIC_VALUES.BORDER);
 	context.stroke(); // draw the lines only
 	context.closePath();
 }
+
+function FPS(){};
+FPS.frames_displayed = 0;
+FPS.displayFPS = function(delay) {
+    setInterval( function(){
+        FPS.frames_displayed = 0 ;
+        var start = new Date();
+        setTimeout( function() {
+            var result =  1000 * FPS.frames_displayed / ((new Date()) - start)
+            displayFPS(result);
+        } , delay ||200);
+    }  , 1.1*delay || 500);
+}
+function displayFPS(value) {
+    $('span#fps').replaceWith('<span id="fps">'+value + ' fps</span>');
+}
+
 
 // unit test :
 function test(){

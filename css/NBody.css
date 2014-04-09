@@ -7,8 +7,10 @@ div.centered{
 	display: table;
 }
 div.node{
-	
 	text-align : center;
 	display:inline-block;
 	display: table-cell;
+}
+canvas {
+    border : 1px solid black;
 }
