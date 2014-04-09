@@ -27,7 +27,8 @@ window.onload = function()
         */
         R = 0.01;
         for (var i=0 ; i< 50 ; i++ ) {
-            allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+//            allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,0.1+0.001*i,0.15,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
             allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
 		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.1,0.1,255,0,0,0);
@@ -64,7 +65,7 @@ window.onload = function()
 	   // var test = setInterval(function(){ console.log(count++);}, 500);
 	   var handler = setInterval(function() { 
 			CM.doNext();
-		} , 10);
+		} , STATIC_VALUES.LOGIC_IDLE_TIME);
 	   /*
 		return;
         while (count<2) {
@@ -137,6 +138,9 @@ function StaticValues(canvas) {
     /** Simulation vars **/
     this.INFINITE = 999999999;
 	
+	/** TECHNICAL CONSTANT**/
+	this.MIN_EVENTS_IN_QUEUE = 300 // number of events required to put logic process in idle state.
+	this.LOGIC_IDLE_TIME = 10 // number of ms of idling >> not really satisfying.
 	////console.log("Static values instanciated.")
 }
 
@@ -357,6 +361,7 @@ CollisionManager.prototype.addFollowingEvents = function(event,callback) {
 
 CollisionManager.prototype.doNext = function () {
 	CM = this;
+	
 	if (CM.running) return;
 	
 	CM.running = true;
@@ -367,9 +372,22 @@ CollisionManager.prototype.doNext = function () {
 	// computing new 
 	CM.resolveEvent(event);
 	
+	// keep process in idle state if event drawing queue is too big 
+	if (CM.AM.events.size >= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
+		ratio = CM.AM.events.size / STATIC_VALUES.MIN_EVENTS_IN_QUEUE;
+		
+		handler = setInterval( function(){
+			
+			if (CM.AM.events.size <= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
+				clearInterval(handler);
+				CM.running = false;
+			 }
+				
+		} , STATIC_VALUES.LOGIC_IDLE_TIME * ratio);
+	} else {
+		CM.running = false;
+	}
 	
-	CM.running = false;
-	//}
 }
 CollisionManager.prototype.moveSpheres = function(duration) {
 	// console.log("BEFORE Spheres states : " + this.getSpheres());

@@ -14,10 +14,7 @@
 		<link href="css/NBody.css" type="text/css" rel="stylesheet" />
     </head>
     <body>
-        <div id="test">
-            <ul id="console">
-                
-            </ul>
+        <div id="test"><span id='fps'></span>
         </div>
 		<div ><span id='valueDuration'></span></div>
 		<canvas id="my_canvas" width="500" height="500">
@@ -26,34 +23,8 @@
     </body>
 <script>
 
-/*$(document).ready(function () {
-    size = 50;
-    MaxPQ = new PriorityQueue();
-    for (var i=0 ; i<size ; i++){
-		val = Math.floor((Math.random()*size)+1);
-        MaxPQ.Insert(new Key(val));
-    }
-	$('body').prepend(MaxPQ.printable());
-    for (var i=0 ; i<size ; i++){
-        maxKey = MaxPQ.DelMax();
-		toappend='<li>Max key of PQ : '+maxKey+'</li>';
-        console.debug("Max key of PQ : "+maxKey+"\nAppending : "+toappend);
-       $('ul#console').append(toappend);
-    } 
-	    size = 50;
-    MinPQ = new PriorityQueue();
-    for (var i=0 ; i<size ; i++){
-		val = Math.floor((Math.random()*size)+1);
-        MinPQ.Insert(new MinKey(val));
-    }
-	$('body').prepend(MinPQ.printable());
-    for (var i=0 ; i<size ; i++){
-        minKey = MinPQ.DelMax();
-		toappend='<li>Min key of PQ : '+minKey+'</li>';
-        console.debug("Min key of PQ : "+minKey+"\nAppending : "+toappend);
-       $('ul#console').append(toappend);
-    } 
+$(document).ready(function () {
+	setInterval(fps.countFps , 2000);
 });
-*/
 </script>
 </html>

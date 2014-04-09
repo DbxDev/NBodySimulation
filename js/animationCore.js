@@ -5,6 +5,26 @@
 		- delta is a function used for non linear animation speed 
 		- step the function execute between each frame
 **/
+var fps = new FPS();
+function FPS () {
+	this.frames_displayed = 0;
+	this.overall_time_start = new Date();
+}
+FPS.prototype.countFps = function() {
+	fps.frames_displayed = 0 ;
+	var start = new Date();
+	var result;
+	setTimeout( function() {
+		current = new Date();
+		result =  1000 * fps.frames_displayed / (current - start)
+		fps.display();
+	} , 200);
+	return result;
+}
+FPS.prototype.display = function() {
+	$('span#fps').replaceWith('<span id="fps">'+fps.countFps() + ' fps</span>');
+}
+
 function AnimationCoreConstants() {};
 AnimationCoreConstants.LINEAR = function(p) { return p; };
 function AnimationCore(){};
@@ -24,6 +44,8 @@ function animate( options ) {
 			delta = AnimationCoreConstants.LINEAR(progress);
 
 		options.step(delta);
+		
+		fps.frames_displayed++;
 		
 		if (progress == 1) {
 			clearInterval(handler); // end animation
@@ -87,7 +109,7 @@ AnimationManager.prototype.animateEvent = function () {
 		}
 		AnimationManager.setRunning();
         nextAE = AM.events.pop().value;
-		console.log("New event : " + nextAE);
+		// console.log("New event : " + nextAE);
 		
 		    	
 		// do animation
