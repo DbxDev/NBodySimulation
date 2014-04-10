@@ -16,21 +16,27 @@ window.onload = function()
 		
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
-		InitBackground(context);
-
-        allSpheres = new Array();
+		// var spheres = generateNSpheres(100, 0.01);
+		// for (var i=0 ; i< spheres.length ; i++ ) { 
+			// console.log("Sphere " + i + " : " + spheres[i]);
+			// spheres[i].Draw(context);
+		// }
+		
+		allSpheres = generateNSpheres(100, 0.02);
+        
 
  /*       for (var i=0 ; i< 10 ; i++ ) {
             allSpheres[i] = new Sphere(i,0.005*i+0.01,1,i*0.1 ,i*0.1 ,0.01*i,0.15*i,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
             allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
         */
-        R = 0.01;
-        for (var i=0 ; i< 50 ; i++ ) {
-//            allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
-allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,0.1+0.01*i,0.001*i,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
-            allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
-        }
+        // R = 0.01;
+		
+        // for (var i=0 ; i< 50 ; i++ ) {
+           // allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+// allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,0.1+0.01*i,0.001*i,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+            // allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
+        // }
 		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.1,0.1,255,0,0,0);
 
 		// step = function (dt) {
@@ -156,3 +162,42 @@ function StaticValues(canvas) {
 	// context.closePath();
 // }
 
+function generateNSpheres(N , R) {
+	var r_margin= R * 1.01 // 1% margin between 2 objects
+	var D = 2 * R ;
+	var d_margin = D * 1.01 ;
+	var elem_on_one_line = parseInt(1/d_margin);
+	var maxIndex = elem_on_one_line * elem_on_one_line;
+	if (maxIndex < N) throw new Error("Impossible situation, too many or too big spheres. N="+N+" , R="+R);
+	var spheres = new Array();
+	var count = 0 , id;
+	var occupied = []; occupied[maxIndex-1] = undefined;
+	while (count<=N && count<= maxIndex) {
+		id=Math.floor((Math.random()*maxIndex)); // between 0 and max-1
+		vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
+		r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
+		while (occupied[id]) id=(id+1)%maxIndex;
+		occupied[id]=true;
+		
+		x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
+		
+		// console.log("x = " + r_margin + " + " + d_margin + " * " + (id/elem_on_one_line>>0) + " = " + x );
+
+		y= r_margin+d_margin*(id%elem_on_one_line); // rest
+
+		// console.log("y = " + r_margin + "+" + d_margin + " * " + (id%elem_on_one_line) + " = " + y );
+
+		spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b);
+		count++;
+	}
+	return spheres
+}
+function shuffleArray( array ) {
+	size = array.lengh
+	for (var i=0 ; i<size ; i++ ) {
+		rand = Math.floor(Math.random()*(size-i))
+		tmp = array[i];
+		array[i] = array[rand];
+		array[rand] = tmp;
+	}
+}

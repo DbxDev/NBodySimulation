@@ -133,8 +133,6 @@ AnimationManager.prototype.unitStepMove = function(duration){
         var dt= dprogress*duration/1000;
 		for (var i=0 ; i< AM.spheres.length ; i++ ) {
 			AM.spheres[i].Move(dt); // need a time in second
-		}
-        for (var i=0 ; i< AM.spheres.length ; i++ ) {
             AM.spheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
         FPS.frames_displayed++;
