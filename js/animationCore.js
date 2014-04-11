@@ -16,6 +16,7 @@ function animate( options ) {
 		var timePassed = new Date() - start;
         // //console.log("Timepassed : " + timePassed);
 		var progress = timePassed / options.duration;
+		console.log("begin " + (new Date()).getMilliseconds());
 		if (progress>1) progress = 1 ;
 		
 		var delta;
@@ -129,12 +130,15 @@ AnimationManager.prototype.unitStepMove = function(duration){
 		dprogress= progress - last_progress;
 		// ////console.log("Step move on : " + AM.getSpheres() + " with progress="+progress+ " last " + last_progress + " and diff:"+dprogress);
 		STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
-
+		STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
+		STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-40,STATIC_VALUES.MAX_Y_COORD-10 , 40);
         var dt= dprogress*duration/1000;
+		console.log("mid " + (new Date()).getMilliseconds());
 		for (var i=0 ; i< AM.spheres.length ; i++ ) {
 			AM.spheres[i].Move(dt); // need a time in second
             AM.spheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
+		console.log("end " + (new Date()).getMilliseconds());
         FPS.frames_displayed++;
 		last_progress=progress;
 		//total_duration+=dprogress*duration/1000;
@@ -165,13 +169,15 @@ function InitBackground(context){
 
 function FPS(){};
 FPS.frames_displayed = 0;
+FPS.current_fps = 0;
 FPS.displayFPS = function(delay) {
     setInterval( function(){
         FPS.frames_displayed = 0 ;
         var start = new Date();
         setTimeout( function() {
-            var result =  1000 * FPS.frames_displayed / ((new Date()) - start)
-            displayFPS(result);
+            var result =  1000 * FPS.frames_displayed / ((new Date()) - start);
+			FPS.current_fps = Math.floor(result);
+            // displayFPS(result);
         } , delay ||200);
     }  , 1.1*delay || 500);
 }

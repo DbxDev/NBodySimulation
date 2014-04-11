@@ -22,14 +22,13 @@ window.onload = function()
 			// spheres[i].Draw(context);
 		// }
 		
-		allSpheres = generateNSpheres(100, 0.02);
+		allSpheres = generateNSpheres(9000, 0.005);
         
 
- /*       for (var i=0 ; i< 10 ; i++ ) {
-            allSpheres[i] = new Sphere(i,0.005*i+0.01,1,i*0.1 ,i*0.1 ,0.01*i,0.15*i,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
+        for (var i=0 ; i< 10 ; i++ ) {
             allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
-        */
+		return
         // R = 0.01;
 		
         // for (var i=0 ; i< 50 ; i++ ) {
@@ -71,7 +70,7 @@ window.onload = function()
 	   // var test = setInterval(function(){ console.log(count++);}, 500);
 	   var handler = setInterval(function() { 
 			CM.doNext();
-		} , STATIC_VALUES.LOGIC_IDLE_TIME);
+		} , STATIC_VALUES.LOGIC_LOOP_PERIOD);
 	   /*
 		return;
         while (count<2) {
@@ -145,8 +144,9 @@ function StaticValues(canvas) {
     this.INFINITE = 999999999;
 	
 	/** TECHNICAL CONSTANT**/
-	this.MIN_EVENTS_IN_QUEUE = 300 // number of events required to put logic process in idle state.
-	this.LOGIC_IDLE_TIME = 10 // number of ms of idling >> not really satisfying.
+	this.MIN_EVENTS_IN_QUEUE = 30 // number of events required to put logic process in idle state.
+	this.LOGIC_IDLE_TIME = 50 // number of ms of idling >> not really satisfying.
+	this.LOGIC_LOOP_PERIOD = 10 // number of ms of between each logic computation.
 	////console.log("Static values instanciated.")
 }
 
@@ -170,25 +170,52 @@ function generateNSpheres(N , R) {
 	var maxIndex = elem_on_one_line * elem_on_one_line;
 	if (maxIndex < N) throw new Error("Impossible situation, too many or too big spheres. N="+N+" , R="+R);
 	var spheres = new Array();
-	var count = 0 , id;
-	var occupied = []; occupied[maxIndex-1] = undefined;
-	while (count<=N && count<= maxIndex) {
-		id=Math.floor((Math.random()*maxIndex)); // between 0 and max-1
-		vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
-		r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
-		while (occupied[id]) id=(id+1)%maxIndex;
-		occupied[id]=true;
+	
+	
+	// Dense case space filled > 50% of total space
+	if (maxIndex <= 2 * N) {
+		for (var i=0 ; i<N ; i++) occupied[i]=true; // reservation of N values for N spheres
+		var occupied = []; 
+		// fill the rest of the array with undefined values.
+		if (maxIndex > N)
+			occupied[maxIndex-1] = undefined;
 		
-		x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
+		// shuffle position.
+		shuffleArray(occupied);
 		
-		// console.log("x = " + r_margin + " + " + d_margin + " * " + (id/elem_on_one_line>>0) + " = " + x );
+		count=0;
+		for (var i=0 ; i<maxIndex ; i++) {
+			if (occupied[i]) {
+				vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
+				r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
+				x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
+				y= r_margin+d_margin*(id%elem_on_one_line); // rest
+				spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b);	
+				count++;
+			}
+		}
+	
+	} else {
+		var count = 0 , id;
+		occupied[maxIndex-1] = undefined;
+		while (count<=N && count<= maxIndex) {
+			id=Math.floor((Math.random()*maxIndex)); // between 0 and max-1
+			vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
+			r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
+			while (occupied[id]) id=(id+1)%maxIndex;
+			occupied[id]=true;
+			
+			x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
+			
+			// console.log("x = " + r_margin + " + " + d_margin + " * " + (id/elem_on_one_line>>0) + " = " + x );
 
-		y= r_margin+d_margin*(id%elem_on_one_line); // rest
+			y= r_margin+d_margin*(id%elem_on_one_line); // rest
 
-		// console.log("y = " + r_margin + "+" + d_margin + " * " + (id%elem_on_one_line) + " = " + y );
+			// console.log("y = " + r_margin + "+" + d_margin + " * " + (id%elem_on_one_line) + " = " + y );
 
-		spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b);
-		count++;
+			spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b);
+			count++;
+		}
 	}
 	return spheres
 }

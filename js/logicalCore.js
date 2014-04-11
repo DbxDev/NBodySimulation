@@ -215,7 +215,7 @@ CollisionManager.prototype.doNext = function () {
     if (CM.AM.events.size >= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
         ratio = CM.AM.events.size / STATIC_VALUES.MIN_EVENTS_IN_QUEUE;
 
-        handler = setInterval( function(){
+        handler = setTimeout( function(){
 
             if (CM.AM.events.size <= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
                 clearInterval(handler);

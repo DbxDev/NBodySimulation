@@ -35,6 +35,9 @@ Sphere.prototype.Draw = function(context){
 	context.arc(normalizedXDistance(this.x), normalizedYDistance(this.y), normalizedXDistance(this.radius), 0, Math.PI*2); // x,y,radius,starting angle, ending angle [, option clockwise]
 	context.fill();
 	context.closePath();
+	context.fillStyle = "black";
+	// context.fillText(this.id,normalizedXDistance(this.x)+normalizedXDistance(this.radius),normalizedYDistance(this.y)-normalizedXDistance(this.radius),normalizedXDistance(2*this.radius));
+	
 };
 /**
  * For more info about this physical part, see the excellent Booksite :
