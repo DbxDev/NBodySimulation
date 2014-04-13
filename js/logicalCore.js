@@ -155,9 +155,6 @@ CollisionManager.prototype.nextEvent = function(){
 };
 /** update speeds and queue all new events **/
 CollisionManager.prototype.resolveEvent = function(event){
-    // STATIC_VALUES.COUNT++;
-    // if (STATIC_VALUES.COUNT > 3)
-    // throw new Error("ENOUGH");
 
     ////console.log("Resolving event " + event + " at time " + this.getTime() );
 
@@ -233,50 +230,7 @@ CollisionManager.prototype.moveSpheres = function(duration) {
     for (var i=0 ; i< this.getSpheres().length ; i++ ) {
         this.getSpheres()[i].Move(duration);
     }
-    // console.log("AFTER Spheres states : " + this.getSpheres());
-    // delay = STATIC_VALUES.DT*1000 // unit of anim is the ms
-    // duration = CM.getEventRealDuration(event)* 1000 // unit of anim is the ms
-    ////console.log("Animation : " + delay + "ms , dur="+duration+ "ms. Event : " + event);
-    // linearMove(this.unitStepMove(duration) , delay ,duration , doNext(this,event));
-    //////console.log("Event after animation " + event);
 };
-
-CollisionManager.prototype.unitStepMove = function(duration){
-    var _this = this; // a copy of the context before the drawing. Sphere positions are not saved. // TODO Rework ?
-    var last_progress=0;
-    var total_duration = 0;
-    return function(progress){
-        dprogress= progress - last_progress;
-        // ////console.log("Step move on : " + _this.getSpheres() + " with progress="+progress+ " last " + last_progress + " and diff:"+dprogress);
-        STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
-        InitBackground(STATIC_VALUES.CONTEXT);
-        for (var i=0 ; i< _this.getSpheres().length ; i++ ) {
-            _this.getSpheres()[i].Move(dprogress*duration/1000); // need a time in second
-            _this.getSpheres()[i].Draw(STATIC_VALUES.CONTEXT);
-        }
-        last_progress=progress;
-        //total_duration+=dprogress*duration/1000;
-        //if (progress == 1) console.log("*********Total duration : " + total_duration + " total move dx="+ (_this.getSpheres()[0].vx * total_duration) +"dy="+ (_this.getSpheres()[0].vy * total_duration));
-    };
-};
-// CollisionManager.prototype.nextEvent = function(){
-// next = events.DelMax().getValue();
-// while (!next.isValid()){
-// next = events.DelMax().getValue();
-// }
-// return next;
-// };
-// CollisionManager.prototype.resolveEvent = function(event){
-// this.time += event.getDuration();
-// if (event.type == Event.TYPE_SPHERE) {
-// this.predict(event.getVertical(),this.time);
-// this.predict(event.getHorizontal(),this.time);
-// } else if (event.type == Event.TYPE_VERTICAL) {
-// this.predict(event.getVertical(),this.time);
-// } else if (event.type == Event.TYPE_HORIZONTAL) {
-// this.predict(event.getHorizontal(),this.time);
-// }
-// };
 
 // Result between 0 and 1
 function normalizedXDistance(distance){
