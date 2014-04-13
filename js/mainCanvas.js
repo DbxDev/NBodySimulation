@@ -22,13 +22,13 @@ window.onload = function()
 			// spheres[i].Draw(context);
 		// }
 		
-		allSpheres = generateNSpheres(9000, 0.005);
+		allSpheres = generateNSpheres(2, 0.05);
         
 
-        for (var i=0 ; i< 10 ; i++ ) {
-            allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
-        }
-		return
+//        for (var i=0 ; i< 10 ; i++ ) {
+//            allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
+//        }
+//		return
         // R = 0.01;
 		
         // for (var i=0 ; i< 50 ; i++ ) {
@@ -144,9 +144,9 @@ function StaticValues(canvas) {
     this.INFINITE = 999999999;
 	
 	/** TECHNICAL CONSTANT**/
-	this.MIN_EVENTS_IN_QUEUE = 30 // number of events required to put logic process in idle state.
+	this.MIN_EVENTS_IN_QUEUE = 10 // number of events required to put logic process in idle state.
 	this.LOGIC_IDLE_TIME = 50 // number of ms of idling >> not really satisfying.
-	this.LOGIC_LOOP_PERIOD = 10 // number of ms of between each logic computation.
+	this.LOGIC_LOOP_PERIOD = 1 // number of ms of between each logic computation.
 	////console.log("Static values instanciated.")
 }
 
@@ -170,12 +170,12 @@ function generateNSpheres(N , R) {
 	var maxIndex = elem_on_one_line * elem_on_one_line;
 	if (maxIndex < N) throw new Error("Impossible situation, too many or too big spheres. N="+N+" , R="+R);
 	var spheres = new Array();
-	
-	
-	// Dense case space filled > 50% of total space
+    var occupied = [];
+
+    // Dense case space filled > 50% of total space
 	if (maxIndex <= 2 * N) {
 		for (var i=0 ; i<N ; i++) occupied[i]=true; // reservation of N values for N spheres
-		var occupied = []; 
+
 		// fill the rest of the array with undefined values.
 		if (maxIndex > N)
 			occupied[maxIndex-1] = undefined;

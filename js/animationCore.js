@@ -12,11 +12,9 @@ function AnimationCore(){};
 
 function animate( options ) {
 	var start = new Date();
-	var handler = setInterval( function(){ 
+	var handler = setInterval( function(){
 		var timePassed = new Date() - start;
-        // //console.log("Timepassed : " + timePassed);
 		var progress = timePassed / options.duration;
-		console.log("begin " + (new Date()).getMilliseconds());
 		if (progress>1) progress = 1 ;
 		
 		var delta;
@@ -25,8 +23,12 @@ function animate( options ) {
 		else 
 			delta = AnimationCoreConstants.LINEAR(progress);
 
+        var begin = (new Date()).getMilliseconds();
+        //console.log("Start anim " + begin);
 		options.step(delta);
-		
+        var stop = (new Date()).getMilliseconds();
+        if (stop - begin > options.duration)
+            console.log("Long Animation : " +(stop - begin ) + " / "+ options.duration);
 
 		
 		if (progress == 1) {
@@ -51,13 +53,14 @@ function linearMove(step, delay , duration , callback) {
 };
 function AnimationConstants(){}
 AnimationConstants.IDLE_TIME = 10 ; // in ms
-AnimationConstants.MAX_FPS = 120; // frames per second
+AnimationConstants.MAX_FPS = 200; // frames per second
 AnimationConstants.PERIOD_FPS = 1/AnimationConstants.MAX_FPS * 1000; // min time in ms between to frame
 
 
 function AnimationManager() {
 	this.events = new Queue(); // a queue of event to draw
 	this.spheres = new Array();
+    this.sumEventTime = 0;
 	// this.running = false;
 }
 AnimationManager.prototype.init = function(spheres){
@@ -92,17 +95,14 @@ AnimationManager.prototype.animateEvent = function () {
 		AnimationManager.setRunning();
         nextAE = AM.events.pop().value;
 		// console.log("New event : " + nextAE);
-		
-		    	
-		// do animation
-    	linearMove(AM.unitStepMove(nextAE.duration) , AnimationConstants.PERIOD_FPS ,nextAE.duration , 
-			function(){ 
+
+   	    linearMove(AM.unitStepMove(nextAE.duration) , AnimationConstants.PERIOD_FPS ,nextAE.duration ,
+			function(){
 				AM.updateFromEvent(nextAE); // update speeds as the event has a duration before a collision for the given sphere states
-	
 				AnimationManager.setEndRun(); // set animation complete
 				// console.log("Final state after animation : " + AM.spheres[0] + " -- " + AM.spheres[1]);
 			});
-	};
+    };
 };
 AnimationManager.prototype.updateFromEvent = function(aEvent) {
 	// console.log("UPDATE speeds : " + this.spheres[0] + " -- " + this.spheres[1] + " from event "+aEvent );
@@ -133,12 +133,10 @@ AnimationManager.prototype.unitStepMove = function(duration){
 		STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
 		STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-40,STATIC_VALUES.MAX_Y_COORD-10 , 40);
         var dt= dprogress*duration/1000;
-		console.log("mid " + (new Date()).getMilliseconds());
 		for (var i=0 ; i< AM.spheres.length ; i++ ) {
 			AM.spheres[i].Move(dt); // need a time in second
             AM.spheres[i].Draw(STATIC_VALUES.CONTEXT);
         }
-		console.log("end " + (new Date()).getMilliseconds());
         FPS.frames_displayed++;
 		last_progress=progress;
 		//total_duration+=dprogress*duration/1000;

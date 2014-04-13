@@ -215,11 +215,11 @@ CollisionManager.prototype.doNext = function () {
     if (CM.AM.events.size >= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
         ratio = CM.AM.events.size / STATIC_VALUES.MIN_EVENTS_IN_QUEUE;
 
-        handler = setTimeout( function(){
+        handler = setInterval( function(){
 
             if (CM.AM.events.size <= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
-                clearInterval(handler);
                 CM.running = false;
+                clearInterval(handler);
             }
 
         } , STATIC_VALUES.LOGIC_IDLE_TIME * ratio);
