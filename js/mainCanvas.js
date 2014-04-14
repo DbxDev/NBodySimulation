@@ -16,102 +16,33 @@ window.onload = function()
 		
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
-		// var spheres = generateNSpheres(100, 0.01);
-		// for (var i=0 ; i< spheres.length ; i++ ) { 
-			// console.log("Sphere " + i + " : " + spheres[i]);
-			// spheres[i].Draw(context);
-		// }
 		
-		allSpheres = generateNSpheres(2, 0.05);
+		allSpheres = generateNSpheres(20, 0.05);
         
 
-//        for (var i=0 ; i< 10 ; i++ ) {
-//            allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
-//        }
-//		return
-        // R = 0.01;
-		
-        // for (var i=0 ; i< 50 ; i++ ) {
-           // allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,i/100,i/100,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
-// allSpheres[i] = new Sphere(R,1,(i%8)*(2*R*1.01)+2*R ,intDiv(i,8)%8*(2*R*1.01)+2*R ,0.1+0.01*i,0.001*i,(100*i)%255,(10*i+50)%255  ,(10*i+100)%255);
-            // allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
-        // }
+       for (var i=0 ; i< allSpheres.length ; i++ ) {
+           allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
+       }
+
 		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.1,0.1,255,0,0,0);
 
-		// step = function (dt) {
-			// context.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-1, STATIC_VALUES.MAX_Y_COORD-1);
-			// InitBackground(context)
-			// for (var i=0 ; i< spheres.length ; i++ ) {
-				// spheres[i].Move(1000*dt);
-				// spheres[i].Draw(context);
-			// }
-		// }
-		
-		// AnimationCore.linearMove(step , 10 , 10000);
-		// return;
 		
         sphere2 = new Sphere(0.05,1,0.2 ,0.8 ,-0.2,-0.1  ,0  ,255,0,1);
-		////console.log("BEGIN Sphere 1 & 2 in CM. Infinite value set to : " + STATIC_VALUES.INFINITE);
 		spheres = new Array(sphere1, sphere2);
-		console.log(spheres[0] , spheres[1]);
+		// console.log(spheres[0] , spheres[1]);
 		// spheres = new Array(sphere1);
 		CM = new CollisionManager(allSpheres);
 		CM.init();
-		//$('body').prepend(CM.printable());
-		////console.log("****************************");
-		////console.log("END Sphere 1 & 2 in CM");
-		////console.log("****************************");
+		
 
 		// return;
 		var count=0;
-		//var doNext = function () {CM.resolveEvent(CM.nextEvent());};
 		
        CM.resolveEvent(CM.nextEvent());
-	   // var test = setInterval(function(){ console.log(count++);}, 500);
 	   var handler = setInterval(function() { 
 			CM.doNext();
 		} , STATIC_VALUES.LOGIC_LOOP_PERIOD);
-	   /*
-		return;
-        while (count<2) {
-			////console.log("Step "+count++);
-			// Nearest event in time
-			next = CM.nextEvent();
-			////console.log("New event : "+next);
-			////console.log("Events in queue : " + CM.sizeEventList());
-			if (isNaN(next.getTime() )) throw new Error("NAN TIME");
-			var timeElapse = 0;
-			// setInterval(animate(next.getDuration()), STATIC_VALUES.DT*1000); // ms expected here
-			CM.resolveEvent(next);
-		}
-    $('body').append(CM.printable());
-		var myInterval = setInterval(animate(100000), STATIC_VALUES.DT*1000);
-		
-	*/	/** animation function **/
-	 /*	function animate(duration){
-			
-			// timeElapse+=STATIC_VALUES.DT;
-			// if (timeElapse >= duration) return;
-			// TODO Compute everything
-			
-			// RAZ canvas
-			context.clearRect(STATIC_VALUES.MIN_X_COORD+1, STATIC_VALUES.MIN_Y_COORD+1, STATIC_VALUES.MAX_X_COORD-2, STATIC_VALUES.MAX_Y_COORD-2);
-			
-			InitBackground(context)
-			// TODO : Draw everything
-			for (var i=0 ; i< spheres.length ; i++ ) {
-                // spheres[i].Move(next.getDuration());
-                spheres[i].Draw(context);
-            }
-			
-            // for (var i=0 ; i< 50 ; i++ ) {
-                // allSpheres[i].Move(STATIC_VALUES.DT);
-                // allSpheres[i].Draw(context);
-            // }
-			// $('span#valueDuration').replaceWith(timeElapse);
-			// ////console.log("Time elapse : " + timeElapse);
-        }
-		*/
+
 }
 
 /* convention
@@ -149,18 +80,6 @@ function StaticValues(canvas) {
 	this.LOGIC_LOOP_PERIOD = 1 // number of ms of between each logic computation.
 	////console.log("Static values instanciated.")
 }
-
-// function InitBackground(context){
-//  // Draw the borders
-	// context.beginPath();
-	// context.moveTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
-	// context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MAX_Y_COORD);
-	// context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MAX_Y_COORD);
-	// context.lineTo(STATIC_VALUES.MAX_Y_COORD, STATIC_VALUES.MIN_Y_COORD);
-	// context.lineTo(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD);
-	// context.stroke(); // draw the lines only
-	// context.closePath();
-// }
 
 function generateNSpheres(N , R) {
 	var r_margin= R * 1.01 // 1% margin between 2 objects

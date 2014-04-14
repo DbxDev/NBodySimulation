@@ -38,13 +38,11 @@ AnimationManager.prototype.startAnimation = function () {
 AnimationManager.prototype.displayFrame = function(){
     AM = this;
     return function(){
-        console.log("Drawing");
         STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
         STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
         STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-40,STATIC_VALUES.MAX_Y_COORD-10 , 40);
         for (var i=0 ; i< AM.spheres.length ; i++ ) {
             AM.spheres[i].Draw(STATIC_VALUES.CONTEXT);
-            console.log("Spheres status : " + AM.spheres[i]);
         }
 
         FPS.frames_displayed++;
@@ -53,6 +51,8 @@ AnimationManager.prototype.displayFrame = function(){
 AnimationManager.prototype.updatePosition = function(){
     var AM = this;
     return function(){
+		if (AM.events.isEmpty())
+			return
         // If short event :
         // update speed and positions
         // stack time
@@ -62,38 +62,47 @@ AnimationManager.prototype.updatePosition = function(){
        }
         // Take the lock
         AnimationManager.setRunning();
-        console.log("Updating");
         var start = new Date();
         var event = AM.events.pop().value;
         var total_duration = event.duration;
         // Stack event until no more event or enough duration.
-        while (total_duration < AnimationConstants.MIN_DURATION_FOR_EVENT && !AM.events.isEmpty() ) {
+        while (total_duration < AnimationConstants.MIN_DURATION_FOR_EVENT && event ) {
             // consuming the short event
             AM.updateAllSpheresPosition(event.duration);
             AM.updateSpeedsFromEvent(event);
             // find the next one and stack it
+			if (AM.events.isEmpty())
+				break
+				
             event = AM.events.pop().value;
             total_duration += event.duration;
-            console.log("updatePosition stacking event");
         }
         // long event - split it into pieces
         if (event.duration >= AnimationConstants.MIN_DURATION_FOR_EVENT) {
             var progress = 0;
             var handler = setInterval(function(){
-                progress += AnimationConstants.MIN_DURATION_FOR_EVENT/event.duration;
-                AM.updateAllSpheresPosition(AnimationConstants.MIN_DURATION_FOR_EVENT);
-                if (progress >= 1) {
-                    AM.updateSpeedsFromEvent(event);
+                progress += AnimationConstants.MIN_DURATION_FOR_EVENT;
+				
+                
+                if (progress >= event.duration) {
+					
+					delta =  AnimationConstants.MIN_DURATION_FOR_EVENT - (progress-event.duration) ; // partial move
+					AM.updateAllSpheresPosition(delta);
+					console.log("Progress : " + progress + "/"+event.duration+" delta = " + delta + " step =" + AnimationConstants.MIN_DURATION_FOR_EVENT);
+					AM.updateSpeedsFromEvent(event);
                     AnimationManager.setEndRun();
                     clearInterval(handler);
                 }
+				
+				AM.updateAllSpheresPosition(AnimationConstants.MIN_DURATION_FOR_EVENT);
+				
             } , AnimationConstants.MIN_DURATION_FOR_EVENT);
         } else {
-            var computation_duration = (new Date()).getMilliseconds() - start.getMilliseconds();
-            var delta = computation_duration - total_duration;
+			var current = new Date();
+            var computation_duration = current - start;
+            var delta = total_duration-computation_duration;
             if (delta > 0 ) {
                 setTimeout(function() {
-                    console.log("updatePosition tempo");
                     AnimationManager.setEndRun();
                 } , delta );
             } else {
@@ -119,10 +128,11 @@ AnimationManager.prototype.updateSpeedsFromEvent = function(aEvent) {
         this.spheres[aEvent.sphereB.id].vy = aEvent.sphereB.vy;
     }
 };
+// dt in ms > converted to second
 AnimationManager.prototype.updateAllSpheresPosition = function(dt){
+	var dur = dt / 1000;
     for (var i=0 ; i< AM.spheres.length ; i++ ) {
-        AM.spheres[i].Move(dt);
-        console.log("Spheres status : " + AM.spheres[i] + " moved during " + dt);
+        AM.spheres[i].Move(dur);
     }
 }
 

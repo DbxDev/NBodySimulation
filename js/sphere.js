@@ -36,7 +36,7 @@ Sphere.prototype.Draw = function(context){
 	context.fill();
 	context.closePath();
 	context.fillStyle = "black";
-	// context.fillText(this.id,normalizedXDistance(this.x)+normalizedXDistance(this.radius),normalizedYDistance(this.y)-normalizedXDistance(this.radius),normalizedXDistance(2*this.radius));
+	context.fillText(this.id,normalizedXDistance(this.x)+normalizedXDistance(this.radius),normalizedYDistance(this.y)-normalizedXDistance(this.radius),normalizedXDistance(2*this.radius));
 	
 };
 /**
