@@ -1,6 +1,5 @@
 window.onload = function()
 {
-
     var canvas = document.getElementById('my_canvas');
         if(!canvas)
         {
@@ -38,7 +37,7 @@ window.onload = function()
 		// return;
 		var count=0;
 		
-       CM.resolveEvent(CM.nextEvent());
+       // CM.resolveEvent(CM.nextEvent());
 	   var handler = setInterval(function() { 
 			CM.doNext();
 		} , STATIC_VALUES.LOGIC_LOOP_PERIOD);
@@ -116,8 +115,9 @@ function generateNSpheres(N , R) {
 	
 	} else {
 		var count = 0 , id;
+		if (maxIndex>4000000000) throw new Error("To small radius.");
 		occupied[maxIndex-1] = undefined;
-		while (count<=N && count<= maxIndex) {
+		while (count<N && count<= maxIndex) {
 			id=Math.floor((Math.random()*maxIndex)); // between 0 and max-1
 			vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
 			r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));

@@ -5,7 +5,7 @@ function AnimationCore(){};
 
 function AnimationConstants(){}
 AnimationConstants.IDLE_TIME = 10 ; // in ms
-AnimationConstants.MAX_FPS = 60; // frames per second
+AnimationConstants.MAX_FPS = 120; // frames per second
 AnimationConstants.PERIOD_FPS = 1/AnimationConstants.MAX_FPS * 1000; // min time in ms between to frame
 AnimationConstants.FAST_LOOP_PERIOD = 1;
 AnimationConstants.MIN_DURATION_FOR_EVENT = 5;
@@ -51,6 +51,7 @@ AnimationManager.prototype.displayFrame = function(){
 AnimationManager.prototype.updatePosition = function(){
     var AM = this;
     return function(){
+		console.log("Try updatePosition");
 		if (AM.events.isEmpty())
 			return
         // If short event :
@@ -60,10 +61,12 @@ AnimationManager.prototype.updatePosition = function(){
        if (AnimationManager.isRunning()) {
            return
        }
+	   console.log("Begin updatePosition");
         // Take the lock
         AnimationManager.setRunning();
         var start = new Date();
-        var event = AM.events.pop().value;
+        var event = AM.events.pop();
+		console.log("New event : " + event + " from " + AM.events);
         var total_duration = event.duration;
         // Stack event until no more event or enough duration.
         while (total_duration < AnimationConstants.MIN_DURATION_FOR_EVENT && event ) {
@@ -74,23 +77,27 @@ AnimationManager.prototype.updatePosition = function(){
 			if (AM.events.isEmpty())
 				break
 				
-            event = AM.events.pop().value;
+            event = AM.events.pop();
             total_duration += event.duration;
         }
         // long event - split it into pieces
         if (event.duration >= AnimationConstants.MIN_DURATION_FOR_EVENT) {
-            var progress = 0;
+			// execute immediatly once and then loop until consummed.
+            var progress = AnimationConstants.MIN_DURATION_FOR_EVENT;
+			AM.updateAllSpheresPosition(AnimationConstants.MIN_DURATION_FOR_EVENT);
+			// console.log("Begin SPLIT");
             var handler = setInterval(function(){
+				// console.log("In SPLIT");
                 progress += AnimationConstants.MIN_DURATION_FOR_EVENT;
-				
                 
                 if (progress >= event.duration) {
 					
 					delta =  AnimationConstants.MIN_DURATION_FOR_EVENT - (progress-event.duration) ; // partial move
 					AM.updateAllSpheresPosition(delta);
-					console.log("Progress : " + progress + "/"+event.duration+" delta = " + delta + " step =" + AnimationConstants.MIN_DURATION_FOR_EVENT);
+					// console.log("Progress : " + progress + "/"+event.duration+" delta = " + delta + " step =" + AnimationConstants.MIN_DURATION_FOR_EVENT);
 					AM.updateSpeedsFromEvent(event);
                     AnimationManager.setEndRun();
+					// console.log("End SPLIT");
                     clearInterval(handler);
                 }
 				
@@ -109,14 +116,14 @@ AnimationManager.prototype.updatePosition = function(){
                 AnimationManager.setEndRun();
             }
         }
+		// console.log("End updatePosition");
     };
 };
 
 
 
 AnimationManager.prototype.addEvent = function (duration , sphereA , sphereB) {
-    var node = new Node(new AnimationEvent(duration, sphereA, sphereB));
-    this.events.push(node);
+    this.events.push(new AnimationEvent(duration, sphereA, sphereB));
 };
 AnimationManager.prototype.updateSpeedsFromEvent = function(aEvent) {
     if (aEvent.sphereA) {
