@@ -32,7 +32,7 @@ AnimationManager.prototype.init = function(spheres){
 };
 AnimationManager.prototype.startAnimation = function () {
     updatePositionLoop=setInterval(this.updatePosition(), AnimationConstants.FAST_LOOP_PERIOD || 1);
-    displayLoop = setInterval(this.displayFrame() , AnimationConstants.PERIOD_FPS || 1/25*1000);
+    displayLoop = setInterval(this.displayFrame() , AnimationConstants.PERIOD_FPS || 1/50*1000);
 };
 
 AnimationManager.prototype.displayFrame = function(){
@@ -78,6 +78,7 @@ AnimationManager.prototype.updatePosition = function(){
 				break
 				
             event = AM.events.pop();
+			console.log("New event : " + event + " from " + AM.events);
             total_duration += event.duration;
         }
         // long event - split it into pieces
@@ -105,6 +106,8 @@ AnimationManager.prototype.updatePosition = function(){
 				
             } , AnimationConstants.MIN_DURATION_FOR_EVENT);
         } else {
+			AM.updateAllSpheresPosition(event.duration);
+            AM.updateSpeedsFromEvent(event);
 			var current = new Date();
             var computation_duration = current - start;
             var delta = total_duration-computation_duration;
@@ -137,7 +140,7 @@ AnimationManager.prototype.updateSpeedsFromEvent = function(aEvent) {
 };
 // dt in ms > converted to second
 AnimationManager.prototype.updateAllSpheresPosition = function(dt){
-	var dur = dt / 1000;
+	var dur = dt * 0.001;
     for (var i=0 ; i< AM.spheres.length ; i++ ) {
         AM.spheres[i].Move(dur);
     }

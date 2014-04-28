@@ -16,21 +16,23 @@ window.onload = function()
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
 		
-		allSpheres = generateNSpheres(20, 0.05);
+		// allSpheres = generateNSpheres(5, 0.10);
         
 
-       for (var i=0 ; i< allSpheres.length ; i++ ) {
-           allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
-       }
+       // for (var i=0 ; i< allSpheres.length ; i++ ) {
+           // allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
+       // }
 
-		sphere1 = new Sphere(0.01,1,0.6 ,0.5 ,0.1,0.1,255,0,0,0);
+		sphere1 = new Sphere(0.1,1,0.12 ,0.12 ,0.1,0.1,255,0);
 
-		
-        sphere2 = new Sphere(0.05,1,0.2 ,0.8 ,-0.2,-0.1  ,0  ,255,0,1);
-		spheres = new Array(sphere1, sphere2);
+		sphere2 = new Sphere(0.1,1,0.5 ,0.12 ,-0.1,-0.1  ,0  ,255,255);
+        sphere3 = new Sphere(0.1,1,0.5 ,0.5 ,-0.1,-0.1  ,0  ,255,255);
+		sphere4 = new Sphere(0.1,1,0.85 ,0.15 ,-0.1,0.1  ,255,155,255);
+		sphere5 = new Sphere(0.1,1,0.85 ,0.55 ,0.1,-0.1 ,0,0,255);
+		spheres = new Array(sphere1, sphere2,sphere3,sphere4,sphere5);
 		// console.log(spheres[0] , spheres[1]);
 		// spheres = new Array(sphere1);
-		CM = new CollisionManager(allSpheres);
+		CM = new CollisionManager(spheres);
 		CM.init();
 		
 
