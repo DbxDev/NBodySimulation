@@ -22,7 +22,7 @@ function Event(sphereA, sphereB, t){
         type = Event.TYPE_HORIZONTAL;
         ////console.log("New event of type TYPE_HORIZONTAL");
     } else {
-        throw new Error("Unable to set a type to the event.");
+        type = Event.TYPE_REDRAWN;
     }
     this.getTime = function(){return time;};
     this.getType = function(){return type;};
@@ -35,7 +35,7 @@ function Event(sphereA, sphereB, t){
 Event.TYPE_SPHERE=0;
 Event.TYPE_VERTICAL=1;
 Event.TYPE_HORIZONTAL=2;
-
+Event.TYPE_REDRAWN=3;
 // We need a min priority queue ie : min valuee on top of the heap.
 Event.prototype.compareTo = function(other) {
     if (this.getTime() < other.getTime()) return 1;
@@ -88,8 +88,8 @@ function CollisionManager(sphereList){
     var size = spheres.length;
     var that = this;
     var time=0;
-    this.AM = new AnimationManager();
-    this.running = false;
+    //this.AM = new AnimationManager();
+    this.drawing = false;
     ////console.log("Building a CM with "+size+" spheres : " + spheres);
     this.getSize = function() { return size;};
     this.getEvents = function() { return events;};
@@ -112,11 +112,17 @@ CollisionManager.prototype.init = function() {
     for (i=0 ; i<this.getSize() ; i++)
         this.predict(this.getSpheres()[i],0);
 
-    this.AM.init(this.getSpheres());
-    this.AM.startAnimation();
+	this.predict(null , 0);
+    // this.AM.init(this.getSpheres());
+    // this.AM.startAnimation();
 }
 /** Predicts all the events for a given sphere **/
 CollisionManager.prototype.predict = function(sphereA , t) {
+	// No sphere : redrawn event.
+	if (sphereA == null) {
+		this.getEvents().Insert(new Event(null , null , t + STATIC_VALUES.LOGIC_LOOP_PERIOD ) );
+		return
+	}
     ////console.log("Predict future of "+ sphereA + " at time " + t);
     for (var i=0 ; i< this.getSize() ; i++) {
         sphereB = this.getSpheres()[i];
@@ -159,24 +165,39 @@ CollisionManager.prototype.resolveEvent = function(event){
     ////console.log("Resolving event " + event + " at time " + this.getTime() );
 
     // Add a new drawing event
-    var duration = this.getEventRealDuration(event) ; // in s
+ //   var duration = this.getEventRealDuration(event) ; // in s
 
     // update simulation position
-    this.moveSpheres(duration);
-    event.doBounce();
-    this.updateTime( duration );
+	var dt = this.getEventRealDuration(event) ;
+	
+    this.moveSpheres( dt );
+    if (event.getType() == Event.TYPE_REDRAWN) {
+		this.displayFrame();
+	} else {
+		event.doBounce();
+	}
+    this.updateTime( dt );
     // queue new events.
     CM.addFollowingEvents(event);
 
     // Send speed and duration infos to the drawing engine
-    var vertical = null , horizontal = null;
-    if (event.getVertical()) vertical = event.getVertical().clone();
-    if (event.getHorizontal()) horizontal = event.getHorizontal().clone();
-    this.AM.addEvent(duration* 1000 , vertical , horizontal );
+    // var vertical = null , horizontal = null;
+    // if (event.getVertical()) vertical = event.getVertical().clone();
+    // if (event.getHorizontal()) horizontal = event.getHorizontal().clone();
+    // this.AM.addEvent(duration* 1000 , vertical , horizontal );
 
 };
 
-CollisionManager.prototype.setEndRun = function () { this.running = false; };
+CollisionManager.prototype.setDrawing = function () { this.drawing = true; };
+CollisionManager.prototype.setEndDrawing = function () { this.drawing = false; };
+CollisionManager.prototype.isDrawing = function () { return this.drawing; };
+
+CollisionManager.prototype.releaseDrawingLock = function(){
+	CM = this;
+	return function(){
+		CM.setEndDrawing();
+	};
+}
 
 CollisionManager.prototype.updateTime = function(duration , callback) {
     this.setTime(this.getTime() + duration);
@@ -191,45 +212,50 @@ CollisionManager.prototype.addFollowingEvents = function(event,callback) {
         CM.predict(event.getVertical(),CM.getTime());
     } else if (event.getType() == Event.TYPE_HORIZONTAL) {
         CM.predict(event.getHorizontal(),CM.getTime());
-    }
+    } else {
+		CM.predict(null , CM.getTime());
+	}
     if (callback) callback();
 };
-
+CollisionManager.prototype.simulate = function(){
+	CM = this;
+	return function(){
+	CM.doNext();
+	setTimeout(CM.simulate() , STATIC_VALUES.LOGIC_LOOP_PERIOD);
+	}
+	};
 CollisionManager.prototype.doNext = function () {
     CM = this;
 
-    if (CM.running) return;
-
-    CM.running = true;
-
-    //console.log("DoNext at time ["+ CM.getTime()+"]" );
-    //return function(){
-    var event = CM.nextEvent();
-    // computing new
-    CM.resolveEvent(event);
-
-    // keep process in idle state if event drawing queue is too big
-    if (CM.AM.events.size >= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
-        ratio = CM.AM.events.size / STATIC_VALUES.MIN_EVENTS_IN_QUEUE;
-
-        handler = setInterval( function(){
-
-            if (CM.AM.events.size <= STATIC_VALUES.MIN_EVENTS_IN_QUEUE) {
-                CM.running = false;
-                clearInterval(handler);
-            }
-
-        } , STATIC_VALUES.LOGIC_IDLE_TIME * ratio);
-    } else {
-        CM.running = false;
-    }
-
+		//console.log("DoNext at time ["+ CM.getTime()+"]" );
+		//return function(){
+		var event = CM.nextEvent();
+		// computing new
+		CM.resolveEvent(event);
 }
 CollisionManager.prototype.moveSpheres = function(duration) {
     // console.log("BEFORE Spheres states : " + this.getSpheres());
     for (var i=0 ; i< this.getSpheres().length ; i++ ) {
         this.getSpheres()[i].Move(duration);
     }
+};
+
+CollisionManager.prototype.displayFrame = function(){
+	if (this.isDrawing() == true) return;
+
+	// take the lock.
+	this.setDrawing();
+
+	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
+	STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
+	STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-40,STATIC_VALUES.MAX_Y_COORD-10 , 40);
+	for (var i=0 ; i< this.getSpheres().length ; i++ ) {
+		this.getSpheres()[i].Draw(STATIC_VALUES.CONTEXT);
+	}
+
+	FPS.frames_displayed++;
+	// Release lock after one FPS period
+	setTimeout(this.releaseDrawingLock() , STATIC_VALUES.PERIOD_FPS * 1000);
 };
 
 // Result between 0 and 1

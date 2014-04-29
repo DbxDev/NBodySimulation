@@ -16,7 +16,7 @@ window.onload = function()
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
 		
-		// allSpheres = generateNSpheres(5, 0.10);
+		allSpheres = generateNSpheres(1000, 0.003);
         
 
        // for (var i=0 ; i< allSpheres.length ; i++ ) {
@@ -32,17 +32,17 @@ window.onload = function()
 		spheres = new Array(sphere1, sphere2,sphere3,sphere4,sphere5);
 		// console.log(spheres[0] , spheres[1]);
 		// spheres = new Array(sphere1);
-		CM = new CollisionManager(spheres);
+		CM = new CollisionManager(allSpheres);
 		CM.init();
+		CM.simulate()();
 		
-
 		// return;
 		var count=0;
 		
        // CM.resolveEvent(CM.nextEvent());
-	   var handler = setInterval(function() { 
-			CM.doNext();
-		} , STATIC_VALUES.LOGIC_LOOP_PERIOD);
+	   // var handler = setInterval(function() { 
+			// CM.doNext();
+		// } , STATIC_VALUES.LOGIC_LOOP_PERIOD);
 
 }
 
@@ -78,7 +78,12 @@ function StaticValues(canvas) {
 	/** TECHNICAL CONSTANT**/
 	this.MIN_EVENTS_IN_QUEUE = 10 // number of events required to put logic process in idle state.
 	this.LOGIC_IDLE_TIME = 50 // number of ms of idling >> not really satisfying.
-	this.LOGIC_LOOP_PERIOD = 1 // number of ms of between each logic computation.
+	
+	this.MAX_FPS = 40; // frames per second
+	this.PERIOD_FPS = 1/this.MAX_FPS; // min time in s between to frame
+
+	this.LOGIC_LOOP_PERIOD = this.PERIOD_FPS * 2 // number of ms of between each logic computation.
+	this.TIME_STEP = this.LOGIC_LOOP_PERIOD * 1000 // same as above in ms (for logic loop)
 	////console.log("Static values instanciated.")
 }
 
@@ -121,7 +126,7 @@ function generateNSpheres(N , R) {
 		occupied[maxIndex-1] = undefined;
 		while (count<N && count<= maxIndex) {
 			id=Math.floor((Math.random()*maxIndex)); // between 0 and max-1
-			vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
+			vx=(1-2*Math.random())*0.06 , vy=(1-2*Math.random())*0.06;
 			r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
 			while (occupied[id]) id=(id+1)%maxIndex;
 			occupied[id]=true;
