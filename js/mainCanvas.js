@@ -83,10 +83,11 @@ function StaticValues(canvas) {
 	this.MAX_FPS = 60; // frames per second
 	this.PERIOD_FPS = 1/this.MAX_FPS; // min time in s between to frame
 
-	this.LOGIC_LOOP_PERIOD = this.PERIOD_FPS  // number of ms of between each logic computation.
+	this.LOGIC_LOOP_PERIOD = this.PERIOD_FPS  // number of s of between each logic computation.
 	this.TIME_STEP = this.LOGIC_LOOP_PERIOD * 1000 * 0.5 // same as above in ms (for logic loop)
 	// this.TIME_STEP = 1 // minimum value
-	////console.log("Static values instanciated.")
+
+	this.TIME_LIMIT = 1 // Events longer are discarded
 }
 
 function generateNSpheres(N , R) {

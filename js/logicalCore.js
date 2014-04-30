@@ -1,3 +1,11 @@
+ANIMATION_FRAME = window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame    ||
+            window.oRequestAnimationFrame      ||
+            window.msRequestAnimationFrame     ||
+			null
+           ;
+
 /** The event object **/
 function Event(sphereA, sphereB, t){
     var a = sphereA;
@@ -132,20 +140,20 @@ CollisionManager.prototype.predict = function(sphereA , t) {
         // computing the time to hit, if finite > new event
         dt = sphereA.timeToHit(sphereB);
         ////console.log("Collision "+sphereA+"--"+sphereB + " at time " + (t+dt) );
-        if (dt != STATIC_VALUES.INFINITE) {
+        if (dt != STATIC_VALUES.INFINITE && dt < STATIC_VALUES.TIME_LIMIT) {
             this.getEvents().Insert(new Event(sphereA , sphereB, t+dt ) );
         }
     }
     ////console.log("Vertical Collision "+sphereA);
     dt = sphereA.TimeToHitVerticalWall();
     ////console.log("at time " + (t+dt) );
-    if ( dt != STATIC_VALUES.INFINITE) {
+    if ( dt != STATIC_VALUES.INFINITE && dt < STATIC_VALUES.TIME_LIMIT) {
         this.getEvents().Insert(new Event(sphereA , null, t+dt ));
     }
     ////console.log("Horizontal Collision "+sphereA);
     dt = sphereA.TimeToHitHorizontalWall();
     ////console.log(" at time " + (t+dt) );
-    if ( dt != STATIC_VALUES.INFINITE) {
+    if ( dt != STATIC_VALUES.INFINITE && dt < STATIC_VALUES.TIME_LIMIT) {
         this.getEvents().Insert(new Event(null , sphereA, t+dt ) );
     }
 };
@@ -222,16 +230,22 @@ CollisionManager.prototype.simulate = function(){
 	CM = this;
 	simulationTime= this.getTime();
 	return function(){
-		CM.doNext();
-		while (CM.getTime() - simulationTime <  STATIC_VALUES.TIME_STEP * 0.001) {
-			CM.doNext();
-		}
-		// var count=0;
-		// while (count < 5) {
+		// CM.doNext();
+		// while (CM.getTime() - simulationTime <  STATIC_VALUES.LOGIC_LOOP_PERIOD) {
 			// CM.doNext();
-			// count++;
 		// }
-		setTimeout(CM.simulate() , STATIC_VALUES.TIME_STEP);
+		var next = CM.nextEvent();
+		while ( next.getType() != Event.TYPE_REDRAWN ) {
+			CM.resolveEvent(next);
+			next = CM.nextEvent();
+		}
+		CM.resolveEvent(next); // Draw
+			
+		if (ANIMATION_FRAME == null)
+			setTimeout(CM.simulate() , STATIC_VALUES.TIME_STEP);
+		else
+			ANIMATION_FRAME(CM.simulate());
+ 
 	};
 };
 CollisionManager.prototype.doNext = function () {
@@ -246,10 +260,10 @@ CollisionManager.prototype.moveSpheres = function(duration) {
 };
 
 CollisionManager.prototype.displayFrame = function(){
-	if (this.isDrawing() == true) return;
+	// if (this.isDrawing() == true) return;
 
 	// take the lock.
-	this.setDrawing();
+	// this.setDrawing();
 
 	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
 	STATIC_VALUES.CONTEXT.fillStyle = "black";
@@ -258,6 +272,7 @@ CollisionManager.prototype.displayFrame = function(){
 	STATIC_VALUES.CONTEXT.fillText(MeanEventTime.meanValue()+" ms",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-20 , 60);
 	STATIC_VALUES.CONTEXT.fillText(MeanEventTime.count +" events",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-30 , 60);
 	STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-40 , 60);
+	STATIC_VALUES.CONTEXT.fillText(CM.getEvents().Size() +" in queue",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-50 , 60);
 
 	for (var i=0 ; i< this.getSpheres().length ; i++ ) {
 		this.getSpheres()[i].Draw(STATIC_VALUES.CONTEXT);
@@ -265,7 +280,7 @@ CollisionManager.prototype.displayFrame = function(){
 
 	FPS.frames_displayed++;
 	// Release lock after one FPS period
-	setTimeout(this.releaseDrawingLock() , STATIC_VALUES.PERIOD_FPS * 1000);
+	// setTimeout(this.releaseDrawingLock() , STATIC_VALUES.PERIOD_FPS * 1000);
 };
 
 // Result between 0 and 1
@@ -287,3 +302,4 @@ MeanEventTime.addDuration = function(duration){
 MeanEventTime.meanValue = function(){
 	return Math.round( MeanEventTime.currentMeanValue / MeanEventTime.count * 1000 * 100)/100;
 };
+

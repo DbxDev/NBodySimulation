@@ -94,9 +94,7 @@ Sphere.prototype.timeToHit = function(other) {
     var dvx = other.vx - this.vx;
     var dvy = other.vy - this.vy;
     var dvdr = dx * dvx + dy * dvy;
-	////console.log(dx+" "+dy+" " + dvx+ " " + dvy + " " +dvdr);
     if (dvdr > 0) {
-		////console.log("[dvdr="+dvdr+" > 0] return "+ STATIC_VALUES.INFINITE);
 		return STATIC_VALUES.INFINITE;
     }
 	var dvdv = dvx*dvx + dvy*dvy;
@@ -104,12 +102,20 @@ Sphere.prototype.timeToHit = function(other) {
     var sigma = this.radius + other.radius;
     var d = dvdr*dvdr - dvdv * (drdr - sigma*sigma);
     if (d<=0) {
-		////console.log("[d="+d+"<0]"+ STATIC_VALUES.INFINITE); 
 		return STATIC_VALUES.INFINITE;
 	}
+	var time = -(dvdr + Math.sqrt(d)) / dvdv;
 	
-	////console.log("Time to hit between : "+ this + " and " + other + " is " + (- (dvdr + Math.sqrt(d)) / dvdv) + " build with "+dvdr+" " + Math.sqrt(d) + " " + dvdv);
-    return -(dvdr + Math.sqrt(d)) / dvdv;
+	// Compute new coord and discard out of bounds events
+	var new_x = this.x + this.vx * time;
+	var new_y = this.y + this.vy * time;
+	if (new_x < 0 || new_x > STATIC_VALUES.MAX_X)
+		return STATIC_VALUES.INFINITE;
+	
+	if (new_y < 0 || new_y > STATIC_VALUES.MAX_Y)
+		return STATIC_VALUES.INFINITE;
+	
+	return time;
 };
 /**
  * Bouncing on an other particle
