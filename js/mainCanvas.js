@@ -16,8 +16,9 @@ window.onload = function()
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
 		
-		allSpheres = generateNSpheres(1000, 0.003);
-        
+		// allSpheres = generateNSpheres(1000, 0.004);
+		allSpheres = generateNSpheres(200, 0.008);
+
 
        // for (var i=0 ; i< allSpheres.length ; i++ ) {
            // allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
@@ -79,11 +80,12 @@ function StaticValues(canvas) {
 	this.MIN_EVENTS_IN_QUEUE = 10 // number of events required to put logic process in idle state.
 	this.LOGIC_IDLE_TIME = 50 // number of ms of idling >> not really satisfying.
 	
-	this.MAX_FPS = 40; // frames per second
+	this.MAX_FPS = 60; // frames per second
 	this.PERIOD_FPS = 1/this.MAX_FPS; // min time in s between to frame
 
-	this.LOGIC_LOOP_PERIOD = this.PERIOD_FPS * 2 // number of ms of between each logic computation.
+	this.LOGIC_LOOP_PERIOD = this.PERIOD_FPS  // number of ms of between each logic computation.
 	this.TIME_STEP = this.LOGIC_LOOP_PERIOD * 1000 // same as above in ms (for logic loop)
+	this.TIME_STEP = 1 // minimum value
 	////console.log("Static values instanciated.")
 }
 
@@ -126,7 +128,7 @@ function generateNSpheres(N , R) {
 		occupied[maxIndex-1] = undefined;
 		while (count<N && count<= maxIndex) {
 			id=Math.floor((Math.random()*maxIndex)); // between 0 and max-1
-			vx=(1-2*Math.random())*0.06 , vy=(1-2*Math.random())*0.06;
+			vx=(1-2*Math.random())*0.2 , vy=(1-2*Math.random())*0.2;
 			r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
 			while (occupied[id]) id=(id+1)%maxIndex;
 			occupied[id]=true;

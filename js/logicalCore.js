@@ -120,7 +120,7 @@ CollisionManager.prototype.init = function() {
 CollisionManager.prototype.predict = function(sphereA , t) {
 	// No sphere : redrawn event.
 	if (sphereA == null) {
-		this.getEvents().Insert(new Event(null , null , t + STATIC_VALUES.LOGIC_LOOP_PERIOD ) );
+		this.getEvents().Insert(new Event(null , null , t + STATIC_VALUES.PERIOD_FPS ) );
 		return
 	}
     ////console.log("Predict future of "+ sphereA + " at time " + t);
@@ -177,6 +177,7 @@ CollisionManager.prototype.resolveEvent = function(event){
 		event.doBounce();
 	}
     this.updateTime( dt );
+	MeanEventTime.addDuration(dt);
     // queue new events.
     CM.addFollowingEvents(event);
 
@@ -219,19 +220,25 @@ CollisionManager.prototype.addFollowingEvents = function(event,callback) {
 };
 CollisionManager.prototype.simulate = function(){
 	CM = this;
+	start = (new Date()).getMilliseconds();
+	simulationTime= this.getTime();
 	return function(){
-	CM.doNext();
-	setTimeout(CM.simulate() , STATIC_VALUES.LOGIC_LOOP_PERIOD);
-	}
+		// var current = (new Date()).getMilliseconds();
+		// while (current - start < STATIC_VALUES.TIME_STEP) {
+			// CM.doNext();
+			// current = (new Date()).getMilliseconds();
+		// }
+		var count=0;
+		while (count < 5) {
+			CM.doNext();
+			count++;
+		}
+		setTimeout(CM.simulate() , STATIC_VALUES.TIME_STEP);
 	};
+};
 CollisionManager.prototype.doNext = function () {
-    CM = this;
-
-		//console.log("DoNext at time ["+ CM.getTime()+"]" );
-		//return function(){
-		var event = CM.nextEvent();
-		// computing new
-		CM.resolveEvent(event);
+	// computing new
+	this.resolveEvent(this.nextEvent());
 }
 CollisionManager.prototype.moveSpheres = function(duration) {
     // console.log("BEFORE Spheres states : " + this.getSpheres());
@@ -247,8 +254,13 @@ CollisionManager.prototype.displayFrame = function(){
 	this.setDrawing();
 
 	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
+	STATIC_VALUES.CONTEXT.fillStyle = "black";
 	STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
-	STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-40,STATIC_VALUES.MAX_Y_COORD-10 , 40);
+	STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-10 , 60);
+	STATIC_VALUES.CONTEXT.fillText(MeanEventTime.meanValue()+" ms",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-20 , 60);
+	STATIC_VALUES.CONTEXT.fillText(MeanEventTime.count +" events",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-30 , 60);
+	STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-40 , 60);
+
 	for (var i=0 ; i< this.getSpheres().length ; i++ ) {
 		this.getSpheres()[i].Draw(STATIC_VALUES.CONTEXT);
 	}
@@ -265,3 +277,15 @@ function normalizedXDistance(distance){
 function normalizedYDistance(distance){
     return distance * (STATIC_VALUES.MAX_Y_COORD - STATIC_VALUES.MIN_Y_COORD) / (STATIC_VALUES.MAX_Y-STATIC_VALUES.MIN_Y);
 }
+
+// Debug tool
+function MeanEventTime () {}
+MeanEventTime.count = 0;
+MeanEventTime.currentMeanValue=0;
+MeanEventTime.addDuration = function(duration){
+	MeanEventTime.count++;
+	MeanEventTime.currentMeanValue+= duration;
+};
+MeanEventTime.meanValue = function(){
+	return Math.round( MeanEventTime.currentMeanValue / MeanEventTime.count * 1000 * 100)/100;
+};
