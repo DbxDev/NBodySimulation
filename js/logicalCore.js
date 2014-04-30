@@ -220,19 +220,17 @@ CollisionManager.prototype.addFollowingEvents = function(event,callback) {
 };
 CollisionManager.prototype.simulate = function(){
 	CM = this;
-	start = (new Date()).getMilliseconds();
 	simulationTime= this.getTime();
 	return function(){
-		// var current = (new Date()).getMilliseconds();
-		// while (current - start < STATIC_VALUES.TIME_STEP) {
-			// CM.doNext();
-			// current = (new Date()).getMilliseconds();
-		// }
-		var count=0;
-		while (count < 5) {
+		CM.doNext();
+		while (CM.getTime() - simulationTime <  STATIC_VALUES.TIME_STEP * 0.001) {
 			CM.doNext();
-			count++;
 		}
+		// var count=0;
+		// while (count < 5) {
+			// CM.doNext();
+			// count++;
+		// }
 		setTimeout(CM.simulate() , STATIC_VALUES.TIME_STEP);
 	};
 };

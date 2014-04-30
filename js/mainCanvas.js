@@ -16,8 +16,8 @@ window.onload = function()
 		 // Begin
 		STATIC_VALUES = new StaticValues(canvas);
 		
-		// allSpheres = generateNSpheres(1000, 0.004);
-		allSpheres = generateNSpheres(200, 0.008);
+		allSpheres = generateNSpheres(2000, 0.004);
+		// allSpheres = generateNSpheres(200, 0.008);
 
 
        // for (var i=0 ; i< allSpheres.length ; i++ ) {
@@ -84,8 +84,8 @@ function StaticValues(canvas) {
 	this.PERIOD_FPS = 1/this.MAX_FPS; // min time in s between to frame
 
 	this.LOGIC_LOOP_PERIOD = this.PERIOD_FPS  // number of ms of between each logic computation.
-	this.TIME_STEP = this.LOGIC_LOOP_PERIOD * 1000 // same as above in ms (for logic loop)
-	this.TIME_STEP = 1 // minimum value
+	this.TIME_STEP = this.LOGIC_LOOP_PERIOD * 1000 * 0.5 // same as above in ms (for logic loop)
+	// this.TIME_STEP = 1 // minimum value
 	////console.log("Static values instanciated.")
 }
 
