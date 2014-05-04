@@ -12,6 +12,18 @@ function UniqueIDGenerator (init) {
 	};
 }
 
+function shuffleArray( array ) {
+    var size = array.length
+    for (var i=0 ; i<size ; i++ ) {
+        var rand = Math.floor(Math.random()*(size-i))
+        var tmp = array[i];
+        array[i] = array[rand];
+        array[rand] = tmp;
+    }
+    return array;
+}
+
+
 function test(){
 	var gen = new UniqueIDGenerator();
 	for (i=0;i<5;i++)
@@ -21,4 +33,6 @@ function test(){
 	for (i=0;i<3;i++)
 		console.log("New shifted ID : " + gen.newId());
 }
+
+
 //test();

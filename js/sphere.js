@@ -34,8 +34,8 @@ Sphere.prototype.Draw = function(context){
 	context.arc(normalizedXDistance(this.x), normalizedYDistance(this.y), normalizedXDistance(this.radius), 0, Math.PI*2); // x,y,radius,starting angle, ending angle [, option clockwise]
 	context.fill();
 	context.closePath();
-	// context.fillStyle = "black";
-	// context.fillText(this.id,normalizedXDistance(this.x),normalizedYDistance(this.y),normalizedXDistance(2*this.radius));
+	context.fillStyle = "black";
+	//context.fillText(this.id,normalizedXDistance(this.x),normalizedYDistance(this.y),normalizedXDistance(2*this.radius));
 	//context.fillText(this.id,normalizedXDistance(this.x)+normalizedXDistance(this.radius),normalizedYDistance(this.y)-normalizedXDistance(this.radius),normalizedXDistance(2*this.radius));
 };
 /**
@@ -111,7 +111,7 @@ Sphere.prototype.timeToHit = function(other) {
 	var new_y = this.y + this.vy * time;
 	if (new_x < 0 || new_x > STATIC_VALUES.MAX_X)
 		return STATIC_VALUES.INFINITE;
-	
+
 	if (new_y < 0 || new_y > STATIC_VALUES.MAX_Y)
 		return STATIC_VALUES.INFINITE;
 	

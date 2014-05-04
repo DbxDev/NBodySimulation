@@ -16,7 +16,9 @@
 		<script src="js/mainCanvas.js"></script>
 <!---->
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-		<link href="css/NBody.css" type="text/css" rel="stylesheet" />
+        <script src="plugins/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js"></script>
+        <link href="plugins/jquery-ui-1.10.4.custom/css/ui-lightness/jquery-ui-1.10.4.custom.min.css" type="text/css" rel="stylesheet" />
+        <link href="css/NBody.css" type="text/css" rel="stylesheet" />
     </head>
     <body>
         <div id="test"><span id='fps'></span>
@@ -25,11 +27,71 @@
 		<canvas id="my_canvas" width="500" height="500">
             Canvas is not supported by your browser.
         </canvas>
+        <div id="infos">
+            <p id="NumberSpheres">
+                <label>Number of spheres :</label>
+                <input type="text"  id="numberOfSphereDisplay"/>
+            </p>
+            <div id="numberOfSpheres"></div>
+            <p id="RadiusSpheres">
+                <label>Radius of spheres : </label>
+                <input type="text" id="radiusDisplay"/>
+            </p>
+            <div id="radiusOfSpheres"></div>
+        </div>
+        <div>
+               <button id="startBrownian" onclick="">Brownian movement simulation</button><button id="startStandart">Regular simulation</button>
+        </div>
     </body>
 <script>
 
 $(document).ready(function () {
+
     FPS.displayFPS(1000);
+    $('#numberOfSpheres').slider({
+        range: "min",
+        value: 15,
+        min: 1,
+        max: 1500,
+        slide : function(event, ui) {
+            $( "#numberOfSphereDisplay" ).val( ui.value );
+        }
+    });
+    $( "#numberOfSphereDisplay" ).val( $('#numberOfSpheres').slider( "value" ) );
+    $('#radiusOfSpheres').slider({
+        range: "min",
+        value: 30,
+        min: 0,
+        max: 50,
+        slide : function(event, ui) {
+            $( "#radiusDisplay" ).val( ui.value / 1000 );
+        }
+    });
+    $( "#radiusDisplay" ).val( function(){return $('#radiusOfSpheres').slider( "value" ) / 1000});
+    $('button#startBrownian').click(function(){
+        N = $("input#numberOfSphereDisplay").val();
+        R = $("input#radiusDisplay").val();
+        startBrownian(N,R);
+    });
+
+    $('button#startStandart').click(function(){
+        N = $("input#numberOfSphereDisplay").val();
+        R = $("input#radiusDisplay").val();
+        startStandard(N,R);
+    })
 });
+function createSlider(idSelector, idDisplay) {
+    $('#'+id).slider({
+        range: "min",
+        value: 37,
+        min: 1,
+        max: 700
+    });
+    if (idDisplay) {
+        $('#'+id).slide(function(event, ui) {
+            $( "#"+idDisplay ).val( "$" + ui.value );
+        });
+    }
+}
 </script>
 </html>

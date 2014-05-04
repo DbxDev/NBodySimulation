@@ -12,39 +12,37 @@ window.onload = function()
             alert("Canvas context not found.");
             return;
         }
-		
-		 // Begin
-		STATIC_VALUES = new StaticValues(canvas);
-		
-		allSpheres = generateNSpheres(2000, 0.004);
-		// allSpheres = generateNSpheres(200, 0.008);
+    STATIC_VALUES = new StaticValues(canvas);
+    spheres = generateBrownianSpheres(800, 0.004);
+    CM = new CollisionManager(spheres);
+    CM.init();
+    CM.simulate()();
+}
 
+function startBrownian(N,R){
+    var brownian = generateBrownianSpheres(N,R);
+    startSimulation(brownian);
+}
+function startStandard(N,R){
+    console.log("N="+N + " R="+ R);
+    var allSpheres = generateNSpheres(N, R);
+   // console.log(allSpheres);
+    startSimulation(allSpheres);
+}
 
-       // for (var i=0 ; i< allSpheres.length ; i++ ) {
-           // allSpheres[i].Draw(STATIC_VALUES.CONTEXT);
-       // }
+var CM=null;
+function startSimulation(spheres){
+    if (CM != null)
+        CM.abort();
 
-		sphere1 = new Sphere(0.1,1,0.12 ,0.12 ,0.1,0.1,255,0);
+    handler = setInterval(function() {
+        if (CM.aborted)
+            setTimeout(handler);
+    } , 1);
 
-		sphere2 = new Sphere(0.1,1,0.5 ,0.12 ,-0.1,-0.1  ,0  ,255,255);
-        sphere3 = new Sphere(0.1,1,0.5 ,0.5 ,-0.1,-0.1  ,0  ,255,255);
-		sphere4 = new Sphere(0.1,1,0.85 ,0.15 ,-0.1,0.1  ,255,155,255);
-		sphere5 = new Sphere(0.1,1,0.85 ,0.55 ,0.1,-0.1 ,0,0,255);
-		spheres = new Array(sphere1, sphere2,sphere3,sphere4,sphere5);
-		// console.log(spheres[0] , spheres[1]);
-		// spheres = new Array(sphere1);
-		CM = new CollisionManager(allSpheres);
-		CM.init();
-		CM.simulate()();
-		
-		// return;
-		var count=0;
-		
-       // CM.resolveEvent(CM.nextEvent());
-	   // var handler = setInterval(function() { 
-			// CM.doNext();
-		// } , STATIC_VALUES.LOGIC_LOOP_PERIOD);
-
+    CM = new CollisionManager(spheres);
+    CM.init();
+    CM.simulate()();
 }
 
 /* convention
@@ -87,7 +85,7 @@ function StaticValues(canvas) {
 	this.TIME_STEP = this.LOGIC_LOOP_PERIOD * 1000 * 0.5 // same as above in ms (for logic loop)
 	// this.TIME_STEP = 1 // minimum value
 
-	this.TIME_LIMIT = 1 // Events longer are discarded
+	this.TIME_LIMIT = 1000 // Events longer are discarded
 }
 
 function generateNSpheres(N , R) {
@@ -101,24 +99,25 @@ function generateNSpheres(N , R) {
     var occupied = [];
 
     // Dense case space filled > 50% of total space
+    console.log("Density : " + maxIndex + " compare to " + 2*N);
 	if (maxIndex <= 2 * N) {
 		for (var i=0 ; i<N ; i++) occupied[i]=true; // reservation of N values for N spheres
 
 		// fill the rest of the array with undefined values.
 		if (maxIndex > N)
-			occupied[maxIndex-1] = undefined;
+            for (i= N ; i< maxIndex ; i++) occupied[i] = null;
 		
 		// shuffle position.
-		shuffleArray(occupied);
+        shuffleArray(occupied);
 		
 		count=0;
 		for (var i=0 ; i<maxIndex ; i++) {
 			if (occupied[i]) {
 				vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
 				r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
-				x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
-				y= r_margin+d_margin*(id%elem_on_one_line); // rest
-				spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b);	
+				x = r_margin + d_margin*(i/elem_on_one_line>>0); // int div
+				y= r_margin+d_margin*(i%elem_on_one_line); // rest
+				spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b,count);
 				count++;
 			}
 		}
@@ -148,12 +147,61 @@ function generateNSpheres(N , R) {
 	}
 	return spheres
 }
-function shuffleArray( array ) {
-	size = array.lengh
-	for (var i=0 ; i<size ; i++ ) {
-		rand = Math.floor(Math.random()*(size-i))
-		tmp = array[i];
-		array[i] = array[rand];
-		array[rand] = tmp;
-	}
+
+function generateBrownianSpheres(N , R) {
+    var mass=1;
+    var bigOneRadiusRatio = 20;
+    var r_margin= R * 1.01 // 1% margin between 2 objects
+    var D = 2 * R ;
+    var d_margin = D * 1.01 ;
+    var elem_on_one_line = parseInt(1/d_margin);
+    var maxIndex = elem_on_one_line * elem_on_one_line;
+    // ( 2 * R ) ^ 2 is the number of spots occupied by the big one.
+    if (maxIndex < N + 4 * bigOneRadiusRatio * bigOneRadiusRatio) throw new Error("Impossible situation, too many or too big spheres. N="+N+" , R="+R);
+    var spheres = new Array();
+    var occupied = [];
+
+    if (N > 2000) throw new Error("To many spheres. Max is 2000.");
+    var count = 0 , id;
+    if (maxIndex>4000000000) throw new Error("To small radius.");
+
+    occupied[maxIndex-1]=undefined; // reservation of N values for N spheres
+
+    // the big one
+    var bigR=bigOneRadiusRatio*R;
+    var bigMass=5*mass;
+    var bigSphere=new Sphere(bigR ,bigMass, 0.5-bigR , 0.5-bigR , 0 , 0,0,0,0,N);
+
+    // mid index
+    var starting_index = (0.5 - bigR / d_margin>>0);
+    var stop_index = (0.5+bigR / d_margin>>0);
+    for (i=starting_index ; i<=stop_index ; i++) {
+        for (j=starting_index ; i<=stop_index ; i++) {
+            occupied[i*elem_on_one_line+j] = true;
+        }
+    }
+
+
+    while (count<N && count<= maxIndex) {
+        id=Math.floor((Math.random()*maxIndex)); // between 0 and max-1
+        vx=(1-2*Math.random())*0.2 , vy=(1-2*Math.random())*0.2;
+        r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
+        while (occupied[id]) id=(id+1)%maxIndex;
+        occupied[id]=true;
+
+        x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
+
+        // console.log("x = " + r_margin + " + " + d_margin + " * " + (id/elem_on_one_line>>0) + " = " + x );
+
+        y= r_margin+d_margin*(id%elem_on_one_line); // rest
+
+        // console.log("y = " + r_margin + "+" + d_margin + " * " + (id%elem_on_one_line) + " = " + y );
+
+        spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b,count);
+        count++;
+    }
+    spheres[N]=bigSphere;
+
+    return spheres
 }
+

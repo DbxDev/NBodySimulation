@@ -98,6 +98,8 @@ function CollisionManager(sphereList){
     var time=0;
     //this.AM = new AnimationManager();
     this.drawing = false;
+    this.aborted = false;
+    this.abortOrder = false;
     ////console.log("Building a CM with "+size+" spheres : " + spheres);
     this.getSize = function() { return size;};
     this.getEvents = function() { return events;};
@@ -234,6 +236,11 @@ CollisionManager.prototype.simulate = function(){
 		// while (CM.getTime() - simulationTime <  STATIC_VALUES.LOGIC_LOOP_PERIOD) {
 			// CM.doNext();
 		// }
+        if (CM.abortOrder){
+            CM.aborted;
+            return;
+        }
+
 		var next = CM.nextEvent();
 		while ( next.getType() != Event.TYPE_REDRAWN ) {
 			CM.resolveEvent(next);
@@ -248,6 +255,11 @@ CollisionManager.prototype.simulate = function(){
  
 	};
 };
+CollisionManager.prototype.abort = function(){
+    this.aborted = true;
+};
+
+
 CollisionManager.prototype.doNext = function () {
 	// computing new
 	this.resolveEvent(this.nextEvent());
@@ -266,17 +278,18 @@ CollisionManager.prototype.displayFrame = function(){
 	// this.setDrawing();
 
 	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
-	STATIC_VALUES.CONTEXT.fillStyle = "black";
-	STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
-	STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-10 , 60);
-	STATIC_VALUES.CONTEXT.fillText(MeanEventTime.meanValue()+" ms",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-20 , 60);
-	STATIC_VALUES.CONTEXT.fillText(MeanEventTime.count +" events",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-30 , 60);
-	STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-40 , 60);
-	STATIC_VALUES.CONTEXT.fillText(CM.getEvents().Size() +" in queue",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-50 , 60);
 
 	for (var i=0 ; i< this.getSpheres().length ; i++ ) {
 		this.getSpheres()[i].Draw(STATIC_VALUES.CONTEXT);
 	}
+
+    STATIC_VALUES.CONTEXT.fillStyle = "black";
+    STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
+    STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-10 , 60);
+    STATIC_VALUES.CONTEXT.fillText(MeanEventTime.meanValue()+" ms",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-20 , 60);
+    STATIC_VALUES.CONTEXT.fillText(MeanEventTime.count +" events",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-30 , 60);
+    STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-40 , 60);
+    STATIC_VALUES.CONTEXT.fillText(CM.getEvents().Size() +" in queue",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-50 , 60);
 
 	FPS.frames_displayed++;
 	// Release lock after one FPS period
