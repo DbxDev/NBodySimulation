@@ -1,3 +1,4 @@
+var STATIC_VALUES = null;
 window.onload = function()
 {
     var canvas = document.getElementById('my_canvas');
@@ -13,38 +14,53 @@ window.onload = function()
             return;
         }
     STATIC_VALUES = new StaticValues(canvas);
-    spheres = generateBrownianSpheres(800, 0.004);
-    CM = new CollisionManager(spheres);
-    CM.init();
-    CM.simulate()();
+
 }
 
 function startBrownian(N,R){
-    var brownian = generateBrownianSpheres(N,R);
-    startSimulation(brownian);
+    var brownian = undefined; 
+	try {
+		brownian = generateBrownianSpheres(N,R);
+		startSimulation(brownian);
+	} catch  (e) {
+		throw e;
+	}
 }
 function startStandard(N,R){
-    console.log("N="+N + " R="+ R);
-    var allSpheres = generateNSpheres(N, R);
-   // console.log(allSpheres);
-    startSimulation(allSpheres);
+	var allSpheres=undefined;
+	try {
+		allSpheres = generateNSpheres(N, R);
+		startSimulation(allSpheres);
+	} catch(e) {
+		throw e;
+	}
+    
 }
 
 var CM=null;
 function startSimulation(spheres){
-    if (CM != null)
+	FPS.displayFPS(1000);
+    if (CM != null) {
         CM.abort();
-
-    handler = setInterval(function() {
-        if (CM.aborted)
-            setTimeout(handler);
-    } , 1);
-
-    CM = new CollisionManager(spheres);
-    CM.init();
-    CM.simulate()();
+		var handler = setInterval(function() {
+			if (CM && CM.aborted) {
+				CM = buildAndStart(spheres);
+				clearInterval(handler);
+			}
+		} , 20);
+	} else {
+		CM = buildAndStart(spheres);
+	}
+    // CM = new CollisionManager(spheres);
+    // CM.init();
+    // CM.simulate()();
 }
-
+function buildAndStart(spheres) {
+	var CM = new CollisionManager(spheres);
+	CM.init();
+	CM.simulate()();
+	return CM
+}
 /* convention
 
 o------> x
@@ -94,7 +110,7 @@ function generateNSpheres(N , R) {
 	var d_margin = D * 1.01 ;
 	var elem_on_one_line = parseInt(1/d_margin);
 	var maxIndex = elem_on_one_line * elem_on_one_line;
-	if (maxIndex < N) throw new Error("Impossible situation, too many or too big spheres. N="+N+" , R="+R);
+	if (maxIndex < N) throw new Error("Impossible situation, too many or too big spheres.");
 	var spheres = new Array();
     var occupied = [];
 
@@ -157,7 +173,7 @@ function generateBrownianSpheres(N , R) {
     var elem_on_one_line = parseInt(1/d_margin);
     var maxIndex = elem_on_one_line * elem_on_one_line;
     // ( 2 * R ) ^ 2 is the number of spots occupied by the big one.
-    if (maxIndex < N + 4 * bigOneRadiusRatio * bigOneRadiusRatio) throw new Error("Impossible situation, too many or too big spheres. N="+N+" , R="+R);
+    if (maxIndex < N + 4 * bigOneRadiusRatio * bigOneRadiusRatio) throw new Error("Impossible situation, too many or too big spheres.");
     var spheres = new Array();
     var occupied = [];
 

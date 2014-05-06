@@ -3,9 +3,9 @@ ANIMATION_FRAME = window.requestAnimationFrame ||
             window.mozRequestAnimationFrame    ||
             window.oRequestAnimationFrame      ||
             window.msRequestAnimationFrame     ||
-			null
+			function(fct) {setTimeout(fct , STATIC_VALUES.TIME_STEP)};
            ;
-
+CANCEL_ANIMATION_FRAME = window.cancelAnimationFrame || clearInterval;
 /** The event object **/
 function Event(sphereA, sphereB, t){
     var a = sphereA;
@@ -119,6 +119,7 @@ CollisionManager.prototype.getEventRealDuration = function(event){
 };
 
 CollisionManager.prototype.init = function() {
+	console.log("Init CM : " + this.getSize() + " spheres " + " events " + this.getEvents().Size());
     for (i=0 ; i<this.getSize() ; i++)
         this.predict(this.getSpheres()[i],0);
 
@@ -247,12 +248,8 @@ CollisionManager.prototype.simulate = function(){
 			next = CM.nextEvent();
 		}
 		CM.resolveEvent(next); // Draw
-			
-		if (ANIMATION_FRAME == null)
-			setTimeout(CM.simulate() , STATIC_VALUES.TIME_STEP);
-		else
-			ANIMATION_FRAME(CM.simulate());
- 
+		
+		ANIMATION_FRAME(CM.simulate());
 	};
 };
 CollisionManager.prototype.abort = function(){

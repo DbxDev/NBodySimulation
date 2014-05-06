@@ -21,21 +21,22 @@
         <link href="css/NBody.css" type="text/css" rel="stylesheet" />
     </head>
     <body>
-        <div id="test"><span id='fps'></span>
-        </div>
 		<div ><span id='valueDuration'></span></div>
-		<canvas id="my_canvas" width="500" height="500">
-            Canvas is not supported by your browser.
-        </canvas>
+		<div>
+			<canvas id="my_canvas" width="500" height="500">
+				Canvas is not supported by your browser.
+			</canvas>
+		</div>
+		<div id="error"></div>
         <div id="infos">
             <p id="NumberSpheres">
                 <label>Number of spheres :</label>
-                <input type="text"  id="numberOfSphereDisplay"/>
+                <input type="number"  id="numberOfSphereDisplay"/>
             </p>
             <div id="numberOfSpheres"></div>
             <p id="RadiusSpheres">
                 <label>Radius of spheres : </label>
-                <input type="text" id="radiusDisplay"/>
+                <input type="number" id="radiusDisplay"/>
             </p>
             <div id="radiusOfSpheres"></div>
         </div>
@@ -47,7 +48,7 @@
 
 $(document).ready(function () {
 
-    FPS.displayFPS(1000);
+    
     $('#numberOfSpheres').slider({
         range: "min",
         value: 15,
@@ -71,13 +72,23 @@ $(document).ready(function () {
     $('button#startBrownian').click(function(){
         N = $("input#numberOfSphereDisplay").val();
         R = $("input#radiusDisplay").val();
-        startBrownian(N,R);
+		N = parseInt(N); R = parseFloat(R);
+        try {
+			startBrownian(N,R);
+		} catch(e) {
+			$('#error').text(e.message);
+		}
     });
 
     $('button#startStandart').click(function(){
         N = $("input#numberOfSphereDisplay").val();
         R = $("input#radiusDisplay").val();
-        startStandard(N,R);
+		N = parseInt(N); R = parseFloat(R);
+        try {
+			startStandard(N,R);
+		} catch(e) {
+			$('#error').text(e.message);
+		}
     })
 });
 function createSlider(idSelector, idDisplay) {
