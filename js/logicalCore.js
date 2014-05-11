@@ -190,7 +190,7 @@ CollisionManager.prototype.resolveEvent = function(event){
     this.updateTime( dt );
 	MeanEventTime.addDuration(dt);
     // queue new events.
-    CM.addFollowingEvents(event);
+    this.addFollowingEvents(event);
 
     // Send speed and duration infos to the drawing engine
     // var vertical = null , horizontal = null;
@@ -205,7 +205,7 @@ CollisionManager.prototype.setEndDrawing = function () { this.drawing = false; }
 CollisionManager.prototype.isDrawing = function () { return this.drawing; };
 
 CollisionManager.prototype.releaseDrawingLock = function(){
-	CM = this;
+	var CM = this;
 	return function(){
 		CM.setEndDrawing();
 	};
@@ -218,19 +218,19 @@ CollisionManager.prototype.updateTime = function(duration , callback) {
 
 CollisionManager.prototype.addFollowingEvents = function(event,callback) {
     if (event.getType() == Event.TYPE_SPHERE) {
-        CM.predict(event.getVertical(),CM.getTime());
-        CM.predict(event.getHorizontal(),CM.getTime());
+        this.predict(event.getVertical(),this.getTime());
+        this.predict(event.getHorizontal(),this.getTime());
     } else if (event.getType() == Event.TYPE_VERTICAL) {
-        CM.predict(event.getVertical(),CM.getTime());
+        this.predict(event.getVertical(),this.getTime());
     } else if (event.getType() == Event.TYPE_HORIZONTAL) {
-        CM.predict(event.getHorizontal(),CM.getTime());
+        this.predict(event.getHorizontal(),this.getTime());
     } else {
-		CM.predict(null , CM.getTime());
+		this.predict(null , this.getTime());
 	}
     if (callback) callback();
 };
 CollisionManager.prototype.simulate = function(){
-	CM = this;
+	var CM = this;
 	simulationTime= this.getTime();
 	return function(){
 		// CM.doNext();
@@ -238,7 +238,7 @@ CollisionManager.prototype.simulate = function(){
 			// CM.doNext();
 		// }
         if (CM.abortOrder){
-            CM.aborted;
+            CM.aborted=true;
             return;
         }
 
@@ -253,7 +253,7 @@ CollisionManager.prototype.simulate = function(){
 	};
 };
 CollisionManager.prototype.abort = function(){
-    this.aborted = true;
+    this.abortOrder = true;
 };
 
 
@@ -269,10 +269,6 @@ CollisionManager.prototype.moveSpheres = function(duration) {
 };
 
 CollisionManager.prototype.displayFrame = function(){
-	// if (this.isDrawing() == true) return;
-
-	// take the lock.
-	// this.setDrawing();
 
 	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
 
@@ -286,11 +282,10 @@ CollisionManager.prototype.displayFrame = function(){
     STATIC_VALUES.CONTEXT.fillText(MeanEventTime.meanValue()+" ms",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-20 , 60);
     STATIC_VALUES.CONTEXT.fillText(MeanEventTime.count +" events",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-30 , 60);
     STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-40 , 60);
-    STATIC_VALUES.CONTEXT.fillText(CM.getEvents().Size() +" in queue",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-50 , 60);
+    STATIC_VALUES.CONTEXT.fillText(this.getEvents().Size() +" in queue",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-50 , 60);
 
 	FPS.frames_displayed++;
-	// Release lock after one FPS period
-	// setTimeout(this.releaseDrawingLock() , STATIC_VALUES.PERIOD_FPS * 1000);
+
 };
 
 // Result between 0 and 1

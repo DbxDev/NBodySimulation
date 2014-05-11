@@ -41,19 +41,32 @@ var CM=null;
 function startSimulation(spheres){
 	FPS.displayFPS(1000);
     if (CM != null) {
-        CM.abort();
-		var handler = setInterval(function() {
-			if (CM && CM.aborted) {
-				CM = buildAndStart(spheres);
-				clearInterval(handler);
-			}
-		} , 20);
-	} else {
-		CM = buildAndStart(spheres);
-	}
-    // CM = new CollisionManager(spheres);
-    // CM.init();
-    // CM.simulate()();
+        stopSimulation(function(){
+            CM = buildAndStart(spheres);
+        });
+    } else {
+        CM = buildAndStart(spheres);
+    }
+
+}
+function stopSimulation(callback){
+    if (CM == null) {
+        callback();
+        return;
+    }
+
+    CM.abort();
+
+    if (callback){
+        var _CM = CM;
+        var handler = setInterval(function() {
+            if (_CM && _CM.aborted) {
+                callback();
+                clearInterval(handler);
+            }
+        } , 20);
+    }
+    CM = null;
 }
 function buildAndStart(spheres) {
 	var CM = new CollisionManager(spheres);

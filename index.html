@@ -28,20 +28,24 @@
 			</canvas>
 		</div>
 		<div id="error"></div>
+        <div id="message"></div>
         <div id="infos">
             <p id="NumberSpheres">
                 <label>Number of spheres :</label>
-                <input type="number"  id="numberOfSphereDisplay"/>
+                <input type="number" step="any" id="numberOfSphereDisplay"/>
             </p>
             <div id="numberOfSpheres"></div>
             <p id="RadiusSpheres">
                 <label>Radius of spheres : </label>
-                <input type="number" id="radiusDisplay"/>
+                <input type="number" step="any" id="radiusDisplay"/>
             </p>
             <div id="radiusOfSpheres"></div>
         </div>
         <div>
                <button id="startBrownian" onclick="">Brownian movement simulation</button><button id="startStandart">Regular simulation</button>
+        </div>
+        <div>
+            <button id="stopSimulation" onclick="">STOP</button>
         </div>
     </body>
 <script>
@@ -89,6 +93,13 @@ $(document).ready(function () {
 		} catch(e) {
 			$('#error').text(e.message);
 		}
+    });
+    $("#stopSimulation").click(function(){
+        stopSimulation(function(){
+            $('#message').text("Simulation stopped.");
+            $('#error').text("");
+            setTimeout(function(){ $('#message').text("");},3000);
+        });
     })
 });
 function createSlider(idSelector, idDisplay) {

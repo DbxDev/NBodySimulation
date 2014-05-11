@@ -17,3 +17,6 @@ canvas {
 div#error{
 	color : red;
 }
+div#message{
+    color : #1c94c4;
+}
