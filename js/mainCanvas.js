@@ -190,7 +190,7 @@ function generateBrownianSpheres(N , R) {
     var spheres = new Array();
     var occupied = [];
 
-    if (N > 2000) throw new Error("To many spheres. Max is 2000.");
+    if (N > 2000) throw new Error("Too many spheres. Max is 2000.");
     var count = 0 , id;
     if (maxIndex>4000000000) throw new Error("To small radius.");
 
