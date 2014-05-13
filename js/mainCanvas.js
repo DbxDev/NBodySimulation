@@ -163,12 +163,8 @@ function generateNSpheres(N , R) {
 			occupied[id]=true;
 			
 			x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
-			
-			// console.log("x = " + r_margin + " + " + d_margin + " * " + (id/elem_on_one_line>>0) + " = " + x );
 
 			y= r_margin+d_margin*(id%elem_on_one_line); // rest
-
-			// console.log("y = " + r_margin + "+" + d_margin + " * " + (id%elem_on_one_line) + " = " + y );
 
 			spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b);
 			count++;
@@ -220,11 +216,7 @@ function generateBrownianSpheres(N , R) {
 
         x = r_margin + d_margin*(id/elem_on_one_line>>0); // int div
 
-        // console.log("x = " + r_margin + " + " + d_margin + " * " + (id/elem_on_one_line>>0) + " = " + x );
-
         y= r_margin+d_margin*(id%elem_on_one_line); // rest
-
-        // console.log("y = " + r_margin + "+" + d_margin + " * " + (id%elem_on_one_line) + " = " + y );
 
         spheres[count] = new Sphere(R,1,x , y,vx,vy,r,g,b,count);
         count++;

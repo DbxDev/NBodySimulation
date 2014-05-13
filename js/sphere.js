@@ -3,6 +3,23 @@
 */
 var IDGen = new UniqueIDGenerator();
 
+
+function initHiddenCanvas(color,radius){
+	var hiddenCanvas;
+	var hiddenContext;
+	hiddenCanvas = document.createElement('canvas');
+	hiddenCanvas.width = normalizedXDistance(2*radius);
+	hiddenCanvas.height = normalizedYDistance(2*radius);
+	hiddenContext = hiddenCanvas.getContext('2d');
+	
+	hiddenContext.fillStyle = color;
+	hiddenContext.beginPath(); 
+	hiddenContext.arc(normalizedXDistance(radius), normalizedYDistance(radius), normalizedXDistance(radius), 0, Math.PI*2); // x,y,radius,starting angle, ending angle [, option clockwise]
+	hiddenContext.fill();
+	hiddenContext.closePath();
+	return hiddenCanvas;
+}
+
 function Sphere(radius, mass, x , y , vx , vy , r , g ,b , id){
 	// Except 0 we require an ID with a valid value
 	if (id !== 0  && !id) id = IDGen.newId();
@@ -16,28 +33,26 @@ function Sphere(radius, mass, x , y , vx , vy , r , g ,b , id){
 	this.r = r ; this.g = g ; this.b = b
 	this.color = rgb(r,g,b);
     this.collision = 0; // number of collisions
+	
+	this.hiddenCanvas = initHiddenCanvas(this.color,this.radius);
+
+
 }
 Sphere.prototype.toString = function(){
 		return "{Sphere#"+this.id+" R="+this.radius+" m="+this.mass+" (x,y)="+this.x+","+this.y+" (vx,vy)="+this.vx+","+this.vy+"}";
 };
 Sphere.prototype.Move = function(dt) {
-    // ////console.log("moving particule " + this +"during dt="+dt+ " dx="+ (this.vx*dt) + " dy="+(this.vy*dt) );
 	this.x += (this.vx * dt);
     this.y += (this.vy * dt);
-	// Test this.x < this.radius || this.y < this.radius || this.x > 1-this.radius || this.y> 1-this.radius
-	// ////console.log("New status " + this);
 };
 Sphere.prototype.Draw = function(context){
-	context.fillStyle = this.color;
-	context.beginPath(); 
-	//////console.log("Drawing : (x,y)=(" + normalizedXDistance(this.x)+","+ normalizedYDistance(this.y) + ")");
-	context.arc(normalizedXDistance(this.x), normalizedYDistance(this.y), normalizedXDistance(this.radius), 0, Math.PI*2); // x,y,radius,starting angle, ending angle [, option clockwise]
-	context.fill();
-	context.closePath();
-	context.fillStyle = "black";
+	// context.drawImage(hiddenCanvas,this.drawn_x,this.drawn_y,this.drawn_width , this.drawn_height, normalizedXDistance(this.x-this.radius), normalizedYDistance(this.y-this.radius),this.drawn_width , this.drawn_height);
+	context.drawImage(this.hiddenCanvas , normalizedXDistance(this.x-this.radius),normalizedYDistance(this.y-this.radius),normalizedXDistance(2*this.radius) , normalizedYDistance(2*this.radius));
+	// context.fillStyle = "black";
 	//context.fillText(this.id,normalizedXDistance(this.x),normalizedYDistance(this.y),normalizedXDistance(2*this.radius));
 	//context.fillText(this.id,normalizedXDistance(this.x)+normalizedXDistance(this.radius),normalizedYDistance(this.y)-normalizedXDistance(this.radius),normalizedXDistance(2*this.radius));
 };
+
 /**
  * For more info about this physical part, see the excellent Booksite :
  * http://algs4.cs.princeton.edu/61event/Particle.java.html
@@ -48,18 +63,15 @@ Sphere.prototype.TimeToHitVerticalWall = function(){
         // already out (possible if dt too big compare to vx)
         if (this.x >= STATIC_VALUES.MAX_X - this.radius) {this.x = STATIC_VALUES.MAX_X - this.radius;}
 		time = (STATIC_VALUES.MAX_X - this.radius - this.x) / this.vx;
-		////console.log("[vx="+this.vx+">0] "+this.x+" - "+this.radius+" return "+ time);
 		return time;
     }
 	else if (this.vx < 0) {
         // already out (possible if dt too big compare to vx)
         if (this.x <= STATIC_VALUES.MIN_X + this.radius) {this.x = STATIC_VALUES.MIN_X + this.radius;}
 		time = (this.x-this.radius-STATIC_VALUES.MIN_X) / -this.vx;
-		////console.log("[vx="+this.vx+"<0]  "+this.x+" - "+this.radius+" return "+ time);
 		return time;
     }
 	else {
-		////console.log("Else case return "+ STATIC_VALUES.INFINITE);
 		return STATIC_VALUES.INFINITE;
 	}
 };
@@ -68,17 +80,14 @@ Sphere.prototype.TimeToHitHorizontalWall = function(){
         // already out (possible if dt too big compare to vx)
         if (this.y >= STATIC_VALUES.MAX_Y - this.radius) {this.y = STATIC_VALUES.MAX_Y - this.radius;}
 		time=(STATIC_VALUES.MAX_Y - this.radius - this.y) / this.vy;
-		////console.log("[vy="+this.vy+">0]  "+this.y+" - "+this.radius+" return "+time);
 		return time;
     }
 	else if (this.vy < 0) {
         if (this.y <= STATIC_VALUES.MIN_Y + this.radius) {this.y = STATIC_VALUES.MIN_Y + this.radius;}
 		time = (this.y - this.radius - STATIC_VALUES.MIN_Y) / -this.vy
-		////console.log("[vy="+this.vy+"<0]  "+this.y+" - "+this.radius+" return "+ time);
 		return time;
     }
 	else {
-		////console.log("Else case return "+ STATIC_VALUES.INFINITE);
 		return STATIC_VALUES.INFINITE;
 	}
 };
@@ -122,7 +131,6 @@ Sphere.prototype.timeToHit = function(other) {
  * @param other
  */
 Sphere.prototype.bounceOff = function(other) {
-    ////console.log("Bounce off " + this + " and " + other);
     var dx = other.x - this.x;
     var dy = other.y - this.y;
     var dvx = other.vx - this.vx;
@@ -145,16 +153,12 @@ Sphere.prototype.bounceOff = function(other) {
     other.collision++;
 };
 Sphere.prototype.bounceOffVerticalWall = function(){
-    ////console.log("BEGIN Bouncing off vertical wall " + this);
     this.vx *= -1 ;
     this.collision++;
-	////console.log("END Bouncing off vertical wall " + this+ " >>> " + this.vx);
 };
 Sphere.prototype.bounceOffHorizontalWall = function(){
-    ////console.log("BEGIN Bouncing off horizontal wall " + this);
     this.vy *= -1 ;
     this.collision++;
-	////console.log("END Bouncing off horizontal wall " + this + " >>> " + this.vy);
 };
 // clone with the same ID
 Sphere.prototype.clone = function() {

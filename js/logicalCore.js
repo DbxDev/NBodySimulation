@@ -11,7 +11,6 @@ function Event(sphereA, sphereB, t){
     var a = sphereA;
     var b = sphereB;
     var time = t;
-    // var duration = dur;
     var collisionA = 0;
     var collisionB = 0;
     var type;
@@ -20,15 +19,12 @@ function Event(sphereA, sphereB, t){
 
     if (sphereA  && sphereB ) 	{
         type = Event.TYPE_SPHERE;
-        ////console.log("New event of type TYPE_SPHERE");
     }
     else if(sphereA) {
         type = Event.TYPE_VERTICAL;
-        ////console.log("New event of type TYPE_VERTICAL");
     }
     else if(sphereB) {
         type = Event.TYPE_HORIZONTAL;
-        ////console.log("New event of type TYPE_HORIZONTAL");
     } else {
         type = Event.TYPE_REDRAWN;
     }
@@ -38,7 +34,6 @@ function Event(sphereA, sphereB, t){
     this.getHorizontal =function(){ return b;};
     this.getVerticalCollision = function(){ return collisionA;};
     this.getHorizontalCollision = function(){ return collisionB;}
-    // this.getDuration =function(){ return duration;};
 }
 Event.TYPE_SPHERE=0;
 Event.TYPE_VERTICAL=1;
@@ -55,27 +50,13 @@ Event.prototype.toString = function(){
 };
 /** update speeds **/
 Event.prototype.doBounce = function(){
-    // console.log("BEFORE Bouncing " + this.getVertical() + " -- " + this.getHorizontal() );
     if (this.getType() == Event.TYPE_SPHERE) this.getVertical().bounceOff(this.getHorizontal());
     else if (this.getType() == Event.TYPE_VERTICAL) this.getVertical().bounceOffVerticalWall();
     else if (this.getType() == Event.TYPE_HORIZONTAL) this.getHorizontal().bounceOffHorizontalWall();
     else throw new Error("No sphere in this event !");
 
-    // console.log("AFTER Bouncing " + this.getVertical() + " -- " + this.getHorizontal() );
 };
 
-// NON SENCE. We need to move all the spheres not only those of the event
-// Event.prototype.moveSpheres = function() {
-// ////console.log("Moving sphere(s).");
-// if (this.getType() == Event.TYPE_SPHERE) {
-// this.getHorizontal().Move(this.getDuration());
-// this.getVertical().Move(this.getDuration());
-// } else if (this.getType() == Event.TYPE_VERTICAL) {
-// this.getVertical().Move(this.getDuration());
-// } else if (this.getType() == Event.TYPE_HORIZONTAL) {
-// this.getHorizontal().Move(this.getDuration());
-// }
-// }
 Event.prototype.isValid = function(){
     var result = true;
     // If the number of collisions has changed > the event is no more valid
@@ -96,16 +77,13 @@ function CollisionManager(sphereList){
     var size = spheres.length;
     var that = this;
     var time=0;
-    //this.AM = new AnimationManager();
     this.drawing = false;
     this.aborted = false;
     this.abortOrder = false;
-    ////console.log("Building a CM with "+size+" spheres : " + spheres);
     this.getSize = function() { return size;};
     this.getEvents = function() { return events;};
     this.getSpheres = function() { return spheres ;};
     this.getTime = function() { return time ; };
-    // this.setTime = function(t) { this.time = t; };
     this.sizeEventList = function(){ return events.Size(); };
     this.setTime = function(t) {  time = t;   };
     this.printable = function() {
@@ -114,7 +92,6 @@ function CollisionManager(sphereList){
 }
 
 CollisionManager.prototype.getEventRealDuration = function(event){
-    //console.log("Event duration : " + event.getTime() +" - " + this.getTime() + " = " + (event.getTime()-this.getTime()));
     return event.getTime()-this.getTime();
 };
 
@@ -122,62 +99,46 @@ CollisionManager.prototype.init = function() {
 	console.log("Init CM : " + this.getSize() + " spheres " + " events " + this.getEvents().Size());
     for (i=0 ; i<this.getSize() ; i++)
         this.predict(this.getSpheres()[i],0);
-
+		
 	this.predict(null , 0);
-    // this.AM.init(this.getSpheres());
-    // this.AM.startAnimation();
 }
 /** Predicts all the events for a given sphere **/
 CollisionManager.prototype.predict = function(sphereA , t) {
 	// No sphere : redrawn event.
+	var dt;
 	if (sphereA == null) {
 		this.getEvents().Insert(new Event(null , null , t + STATIC_VALUES.PERIOD_FPS ) );
 		return
 	}
-    ////console.log("Predict future of "+ sphereA + " at time " + t);
     for (var i=0 ; i< this.getSize() ; i++) {
-        sphereB = this.getSpheres()[i];
-        ////console.log("Collision "+sphereA+"--"+sphereB);
+        var sphereB = this.getSpheres()[i];
         // no event on self
         if (sphereA === sphereB) continue;
         // computing the time to hit, if finite > new event
         dt = sphereA.timeToHit(sphereB);
-        ////console.log("Collision "+sphereA+"--"+sphereB + " at time " + (t+dt) );
         if (dt != STATIC_VALUES.INFINITE && dt < STATIC_VALUES.TIME_LIMIT) {
             this.getEvents().Insert(new Event(sphereA , sphereB, t+dt ) );
         }
     }
-    ////console.log("Vertical Collision "+sphereA);
     dt = sphereA.TimeToHitVerticalWall();
-    ////console.log("at time " + (t+dt) );
     if ( dt != STATIC_VALUES.INFINITE && dt < STATIC_VALUES.TIME_LIMIT) {
         this.getEvents().Insert(new Event(sphereA , null, t+dt ));
     }
-    ////console.log("Horizontal Collision "+sphereA);
     dt = sphereA.TimeToHitHorizontalWall();
-    ////console.log(" at time " + (t+dt) );
     if ( dt != STATIC_VALUES.INFINITE && dt < STATIC_VALUES.TIME_LIMIT) {
         this.getEvents().Insert(new Event(null , sphereA, t+dt ) );
     }
 };
 
 CollisionManager.prototype.nextEvent = function(){
-    next = this.getEvents().DelMax();
-    ////console.log("Next event : " + next  );
+    var next = this.getEvents().DelMax();
     while (!next.isValid()){
         next = this.getEvents().DelMax();
-        ////console.log("[while] Next event : " + next );
     }
     return next;
 };
 /** update speeds and queue all new events **/
 CollisionManager.prototype.resolveEvent = function(event){
-
-    ////console.log("Resolving event " + event + " at time " + this.getTime() );
-
-    // Add a new drawing event
- //   var duration = this.getEventRealDuration(event) ; // in s
-
     // update simulation position
 	var dt = this.getEventRealDuration(event) ;
 	
@@ -191,13 +152,6 @@ CollisionManager.prototype.resolveEvent = function(event){
 	MeanEventTime.addDuration(dt);
     // queue new events.
     this.addFollowingEvents(event);
-
-    // Send speed and duration infos to the drawing engine
-    // var vertical = null , horizontal = null;
-    // if (event.getVertical()) vertical = event.getVertical().clone();
-    // if (event.getHorizontal()) horizontal = event.getHorizontal().clone();
-    // this.AM.addEvent(duration* 1000 , vertical , horizontal );
-
 };
 
 CollisionManager.prototype.setDrawing = function () { this.drawing = true; };
@@ -233,10 +187,6 @@ CollisionManager.prototype.simulate = function(){
 	var CM = this;
 	simulationTime= this.getTime();
 	return function(){
-		// CM.doNext();
-		// while (CM.getTime() - simulationTime <  STATIC_VALUES.LOGIC_LOOP_PERIOD) {
-			// CM.doNext();
-		// }
         if (CM.abortOrder){
             CM.aborted=true;
             return;
@@ -256,13 +206,7 @@ CollisionManager.prototype.abort = function(){
     this.abortOrder = true;
 };
 
-
-CollisionManager.prototype.doNext = function () {
-	// computing new
-	this.resolveEvent(this.nextEvent());
-}
 CollisionManager.prototype.moveSpheres = function(duration) {
-    // console.log("BEFORE Spheres states : " + this.getSpheres());
     for (var i=0 ; i< this.getSpheres().length ; i++ ) {
         this.getSpheres()[i].Move(duration);
     }
