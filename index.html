@@ -17,7 +17,6 @@
 <!---->
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script src="plugins/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js"></script>
-		<script src="js/vendor/modernizr.js"></script>
 		<script src="plugins/foundation5.2.2/js/foundation.min.js"></script>		
 		
         <link href="plugins/jquery-ui-1.10.4.custom/css/ui-lightness/jquery-ui-1.10.4.custom.min.css" type="text/css" rel="stylesheet" />
@@ -25,138 +24,116 @@
 		<link href="css/NBody.css" type="text/css" rel="stylesheet" />
     </head>
     <body>
+		<div class="fixed">
+			<nav class="top-bar" data-topbar>
+				<ul class="title-area">
+					<li class="name">
+						<h1><a href="#">N Body simulation</a></h1>
+					</li>
+				</ul>
+				 <section class="top-bar-section">
+				<!-- Right Nav Section -->
+					<ul class="right">
+						<li class="name">
+							<h1><a href="#">DBX 2014</a></h1>
+						</li>
+					</ul>
+				</section>
+			</nav>
+		</div>
 		<div class="row ">
 			<div class="large-12 columns">
-				<div class="large-8 columns">
-					<div class="row">
-						<div class="large-12 columns">
-							<canvas id="my_canvas" width="500" height="500">
-								Canvas is not supported by your browser.
-							</canvas>
+				<h1>  </h1>
+			</div>
+		</div>
+		<div class="row " style="padding : 1em ; background-color: lightgoldenrodyellow;">
+			<div class="large-8 columns ">
+				<div class="row">
+					<div class="large-12 columns">
+						<canvas id="my_canvas" width="500" height="500">
+							Canvas is not supported by your browser.
+						</canvas>
+					</div>
+				</div>
+				<div class="row">
+					<div id="error"  class="large-12 columns" ></div>
+				</div>
+				<div class="row">
+					<div id="message" class="large-12 columns"></div>
+				</div>
+			</div>
+			
+			
+			<div class="large-4 columns left-border">
+				<div class="row">
+					<div class="large-12 columns">
+						<h5> Parameters </h5>
+					</div>
+				</div>
+				<div class="row">
+					<div class ="large-12 columns">
+						<div id="infos" ></div>
+					</div>
+				</div>
+
+				<div class="row">
+					<label>
+						<div class="large-8 columns">
+							<span>Number of spheres :</span>
 						</div>
-					</div>
-					<div class="row">
-						<div id="error"  class="large-12 columns" ></div>
-					</div>
-					<div class="row">
-						<div id="message" class="large-12 columns"></div>
+						<div class ="large-4  columns">	
+							<input type="number" step="any" id="numberOfSphereDisplay"/>	
+						</div>
+					</label>
+				</div>
+				<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+					<div class="large-12 columns" >
+						<div id="numberOfSpheres" class="row"></div>
 					</div>
 				</div>
 				
+				<div class="row">
+					<label>
+						<div class="large-8 columns">
+							<span>Radius of spheres : </span>
+						</div>
+						<div class ="large-4  columns">	
+							<input type="number" step="any" id="radiusDisplay"/>
+						</div>
+					</label>
+				</div>
+				<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+					<div class ="large-12 columns">
+						<div id="radiusOfSpheres" class="row"></div>
+					</div>
+				</div>
 				
-				<div class="large-4 columns">
-					<div class="row">
-						<div class ="large-12 columns">
-							<div id="infos" ></div>
-						</div>
+				<div class="row">
+					<div class ="large-12 columns">
+						<h5>Start a simulation :</h5>
 					</div>
-					<div class="row">
-						<div class ="large-12 columns">
-							<p id="NumberSpheres">
-								<label>Number of spheres :</label>
-								<input type="number" step="any" id="numberOfSphereDisplay"/>
-							</p>
-						</div>
+				</div>
+	
+				<div class="row">
+					<div class ="large-6 columns">
+						<button id="startStandart" class="button expand" >Regular</button>
 					</div>
-					<div class="row">
-						<div class ="large-12 columns">
-							<div id="numberOfSpheres"></div>
-						</div>
+					<div class ="large-6 columns">
+						 <button id="startBrownian" class="button expand" >Brownian motion</button>
 					</div>
-					<div class="row">
-						<div class ="large-12 columns">
-							<p id="RadiusSpheres">
-								<label>Radius of spheres : </label>
-								<input type="number" step="any" id="radiusDisplay"/>
-							</p>
-						</div>
-					</div>
-					<div class="row">
-						<div class ="large-12 columns">
-							<div id="radiusOfSpheres" class="row"></div>
-						</div>
-					</div>
-				
-					<div class="row">
-						<div class ="large-12 columns">
-							<button id="startBrownian" onclick="">Brownian movement simulation</button><button id="startStandart">Regular simulation</button>
-						</div>
-					</div>
-					<div class="row">
-						<div class ="large-12 columns">
-							<button id="stopSimulation" onclick="">STOP</button>
-						</div>
+				</div>
+
+			
+				<div class="row">
+					<div class ="large-12 columns">
+						<button id="stopSimulation" class="button expand alert" onclick="">Stop</button>
 					</div>
 				</div>
 			</div>
 		</div>
     </body>
+<script src="js/buildGUI.js"></script>
 <script>
-
-$(document).ready(function () {
-
-    
-    $('#numberOfSpheres').slider({
-        range: "min",
-        value: 1,
-        min: 1,
-        max: 1500,
-        slide : function(event, ui) {
-            $( "#numberOfSphereDisplay" ).val( ui.value );
-        }
-    });
-    $( "#numberOfSphereDisplay" ).val( $('#numberOfSpheres').slider( "value" ) );
-    $('#radiusOfSpheres').slider({
-        range: "min",
-        value: 30,
-        min: 0,
-        max: 50,
-        slide : function(event, ui) {
-            $( "#radiusDisplay" ).val( ui.value / 1000 );
-        }
-    });
-    $( "#radiusDisplay" ).val( function(){return $('#radiusOfSpheres').slider( "value" ) / 1000});
-    $('button#startBrownian').click(function(){
-        N = $("input#numberOfSphereDisplay").val();
-        R = $("input#radiusDisplay").val();
-		N = parseInt(N); R = parseFloat(R);
-        try {
-			startBrownian(N,R);
-		} catch(e) {
-			$('#error').text(e.message);
-		}
-    });
-
-    $('button#startStandart').click(function(){
-        N = $("input#numberOfSphereDisplay").val();
-        R = $("input#radiusDisplay").val();
-		N = parseInt(N); R = parseFloat(R);
-        try {
-			startStandard(N,R);
-		} catch(e) {
-			$('#error').text(e.message);
-		}
-    });
-    $("#stopSimulation").click(function(){
-        stopSimulation(function(){
-            $('#message').text("Simulation stopped.");
-            $('#error').text("");
-            setTimeout(function(){ $('#message').text("");},3000);
-        });
-    })
-});
-function createSlider(idSelector, idDisplay) {
-    $('#'+id).slider({
-        range: "min",
-        value: 37,
-        min: 1,
-        max: 700
-    });
-    if (idDisplay) {
-        $('#'+id).slide(function(event, ui) {
-            $( "#"+idDisplay ).val( "$" + ui.value );
-        });
-    }
-}
+	$(document).foundation();
 </script>
 </html>
