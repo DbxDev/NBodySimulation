@@ -149,7 +149,6 @@ CollisionManager.prototype.resolveEvent = function(event){
 		event.doBounce();
 	}
     this.updateTime( dt );
-	MeanEventTime.addDuration(dt);
     // queue new events.
     this.addFollowingEvents(event);
 };
@@ -221,12 +220,8 @@ CollisionManager.prototype.displayFrame = function(){
 	}
 
     STATIC_VALUES.CONTEXT.fillStyle = "black";
-    STATIC_VALUES.CONTEXT.fillText("N Body Simulation alpha 2014" ,STATIC_VALUES.MIN_X_COORD+20,STATIC_VALUES.MIN_Y_COORD+20);
-    STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-10 , 60);
-    STATIC_VALUES.CONTEXT.fillText(MeanEventTime.meanValue()+" ms",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-20 , 60);
-    STATIC_VALUES.CONTEXT.fillText(MeanEventTime.count +" events",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-30 , 60);
-    STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-40 , 60);
-    STATIC_VALUES.CONTEXT.fillText(this.getEvents().Size() +" in queue",STATIC_VALUES.MAX_X_COORD-60,STATIC_VALUES.MAX_Y_COORD-50 , 60);
+    STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-45,STATIC_VALUES.MAX_Y_COORD-10 , 40);
+    // STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-65,STATIC_VALUES.MAX_Y_COORD-20 , 60);
 
 	FPS.frames_displayed++;
 
@@ -240,15 +235,4 @@ function normalizedYDistance(distance){
     return distance * (STATIC_VALUES.MAX_Y_COORD - STATIC_VALUES.MIN_Y_COORD) / (STATIC_VALUES.MAX_Y-STATIC_VALUES.MIN_Y);
 }
 
-// Debug tool
-function MeanEventTime () {}
-MeanEventTime.count = 0;
-MeanEventTime.currentMeanValue=0;
-MeanEventTime.addDuration = function(duration){
-	MeanEventTime.count++;
-	MeanEventTime.currentMeanValue+= duration;
-};
-MeanEventTime.meanValue = function(){
-	return Math.round( MeanEventTime.currentMeanValue / MeanEventTime.count * 1000 * 100)/100;
-};
 
