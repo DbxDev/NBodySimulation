@@ -25,6 +25,7 @@ function Sphere(radius, mass, x , y , vx , vy , r , g ,b , id){
 	if (id !== 0  && !id) id = IDGen.newId();
 	this.id = id 
 	this.radius = radius;
+	this.diameter = 2*this.radius;
 	this.mass = mass;
 	this.x= x;
 	this.y = y;
@@ -42,12 +43,12 @@ Sphere.prototype.toString = function(){
 		return "{Sphere#"+this.id+" R="+this.radius+" m="+this.mass+" (x,y)="+this.x+","+this.y+" (vx,vy)="+this.vx+","+this.vy+"}";
 };
 Sphere.prototype.Move = function(dt) {
-	this.x += (this.vx * dt);
-    this.y += (this.vy * dt);
+	this.x += this.vx * dt;
+    this.y += this.vy * dt;
 };
 Sphere.prototype.Draw = function(context){
 	// context.drawImage(hiddenCanvas,this.drawn_x,this.drawn_y,this.drawn_width , this.drawn_height, normalizedXDistance(this.x-this.radius), normalizedYDistance(this.y-this.radius),this.drawn_width , this.drawn_height);
-	context.drawImage(this.hiddenCanvas , normalizedXDistance(this.x-this.radius),normalizedYDistance(this.y-this.radius),normalizedXDistance(2*this.radius) , normalizedYDistance(2*this.radius));
+	context.drawImage(this.hiddenCanvas , normalizedXDistance(this.x-this.radius),normalizedYDistance(this.y-this.radius),normalizedXDistance(this.diameter) , normalizedYDistance(this.diameter));
 	// context.fillStyle = "black";
 	//context.fillText(this.id,normalizedXDistance(this.x),normalizedYDistance(this.y),normalizedXDistance(2*this.radius));
 	//context.fillText(this.id,normalizedXDistance(this.x)+normalizedXDistance(this.radius),normalizedYDistance(this.y)-normalizedXDistance(this.radius),normalizedXDistance(2*this.radius));
@@ -62,14 +63,12 @@ Sphere.prototype.TimeToHitVerticalWall = function(){
     if (this.vx > 0) {
         // already out (possible if dt too big compare to vx)
         if (this.x >= STATIC_VALUES.MAX_X - this.radius) {this.x = STATIC_VALUES.MAX_X - this.radius;}
-		time = (STATIC_VALUES.MAX_X - this.radius - this.x) / this.vx;
-		return time;
+		return (STATIC_VALUES.MAX_X - this.radius - this.x) / this.vx;
     }
 	else if (this.vx < 0) {
         // already out (possible if dt too big compare to vx)
         if (this.x <= STATIC_VALUES.MIN_X + this.radius) {this.x = STATIC_VALUES.MIN_X + this.radius;}
-		time = (this.x-this.radius-STATIC_VALUES.MIN_X) / -this.vx;
-		return time;
+		return (this.x-this.radius-STATIC_VALUES.MIN_X) / -this.vx;
     }
 	else {
 		return STATIC_VALUES.INFINITE;
@@ -79,13 +78,11 @@ Sphere.prototype.TimeToHitHorizontalWall = function(){
     if (this.vy > 0) {
         // already out (possible if dt too big compare to vx)
         if (this.y >= STATIC_VALUES.MAX_Y - this.radius) {this.y = STATIC_VALUES.MAX_Y - this.radius;}
-		time=(STATIC_VALUES.MAX_Y - this.radius - this.y) / this.vy;
-		return time;
+		return (STATIC_VALUES.MAX_Y - this.radius - this.y) / this.vy;
     }
 	else if (this.vy < 0) {
         if (this.y <= STATIC_VALUES.MIN_Y + this.radius) {this.y = STATIC_VALUES.MIN_Y + this.radius;}
-		time = (this.y - this.radius - STATIC_VALUES.MIN_Y) / -this.vy
-		return time;
+		return (this.y - this.radius - STATIC_VALUES.MIN_Y) / -this.vy;
     }
 	else {
 		return STATIC_VALUES.INFINITE;

@@ -12,7 +12,8 @@ function PriorityQueue(){
     // Private methods
     var swim = function(i){
         //console.debug("Swimming index " + i);
-		k=i
+		var k=i
+		var half_k;
         while (k>1){
 			half_k= intDiv(k,2);
 			//console.debug("k="+k+" : " + heap[k] + " k/2="+half_k+" " + heap[half_k]);
@@ -26,7 +27,7 @@ function PriorityQueue(){
     };
     var sink = function(i){
         //console.debug("Sinking index " + i);
-		k=i;
+		var k=i;
         while (k<=size){
             // Compare parent and both children
 			//heap[k].compareTo(heap[2*k])<0
@@ -67,7 +68,7 @@ function PriorityQueue(){
     };
     // Public methods
     var swap = function(i,j){
-        old_swap = heap[i];
+        var old_swap = heap[i];
         heap[i] = heap[j];
         heap[j] = old_swap
     };
@@ -137,8 +138,8 @@ function Key(value) {
 	}
 }
 // Reverse ordered key. This object generate a Min priority queue.
-function MinKey(value) {
-    var value = value;
+function MinKey(val) {
+    var value = val;
     var that = this;
     this.getValue = function(){
         return value;

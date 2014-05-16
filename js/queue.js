@@ -4,7 +4,7 @@ function Queue() {
 	this.last = null;
 }
 Queue.prototype.push = function (value) {
-	node = new Node(value);
+	var node = new Node(value);
 	if (this.size == 0) {
 		this.first = node;
 		this.last = node;

@@ -96,6 +96,11 @@ function StaticValues(canvas) {
 	this.MIN_Y_COORD = this.BORDER;
 	this.MAX_X_COORD = canvas.width - this.BORDER;
 	this.MAX_Y_COORD = canvas.height - this.BORDER;
+	
+	// Normalized ratio
+	this.NORM_X_RATIO = (this.MAX_X_COORD - this.MIN_X_COORD)/(this.MAX_X-this.MIN_X)
+	this.NORM_Y_RATIO = (this.MAX_Y_COORD - this.MIN_Y_COORD) / (this.MAX_Y-this.MIN_Y);
+	
 	/** 1 unit of space = 10 px **/
 	this.UNIT_SPACE_TO_PX = 10;
 	/** dt **/

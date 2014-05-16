@@ -77,7 +77,7 @@ function CollisionManager(sphereList){
     var size = spheres.length;
     var that = this;
     var time=0;
-    this.drawing = false;
+    
     this.aborted = false;
     this.abortOrder = false;
     this.getSize = function() { return size;};
@@ -110,8 +110,9 @@ CollisionManager.prototype.predict = function(sphereA , t) {
 		this.getEvents().Insert(new Event(null , null , t + STATIC_VALUES.PERIOD_FPS ) );
 		return
 	}
+	var sphereB;
     for (var i=0 ; i< this.getSize() ; i++) {
-        var sphereB = this.getSpheres()[i];
+        sphereB = this.getSpheres()[i];
         // no event on self
         if (sphereA === sphereB) continue;
         // computing the time to hit, if finite > new event
@@ -153,16 +154,6 @@ CollisionManager.prototype.resolveEvent = function(event){
     this.addFollowingEvents(event);
 };
 
-CollisionManager.prototype.setDrawing = function () { this.drawing = true; };
-CollisionManager.prototype.setEndDrawing = function () { this.drawing = false; };
-CollisionManager.prototype.isDrawing = function () { return this.drawing; };
-
-CollisionManager.prototype.releaseDrawingLock = function(){
-	var CM = this;
-	return function(){
-		CM.setEndDrawing();
-	};
-}
 
 CollisionManager.prototype.updateTime = function(duration , callback) {
     this.setTime(this.getTime() + duration);
@@ -206,7 +197,8 @@ CollisionManager.prototype.abort = function(){
 };
 
 CollisionManager.prototype.moveSpheres = function(duration) {
-    for (var i=0 ; i< this.getSpheres().length ; i++ ) {
+	var max = this.getSize()
+    for (var i=0 ; i< max ; i++ ) {
         this.getSpheres()[i].Move(duration);
     }
 };
@@ -215,13 +207,13 @@ CollisionManager.prototype.displayFrame = function(){
 
 	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
 
-	for (var i=0 ; i< this.getSpheres().length ; i++ ) {
+	for (var i=0 ; i< this.getSize() ; i++ ) {
 		this.getSpheres()[i].Draw(STATIC_VALUES.CONTEXT);
 	}
 
     STATIC_VALUES.CONTEXT.fillStyle = "black";
     STATIC_VALUES.CONTEXT.fillText(FPS.current_fps+" FPS" ,STATIC_VALUES.MAX_X_COORD-45,STATIC_VALUES.MAX_Y_COORD-10 , 40);
-    // STATIC_VALUES.CONTEXT.fillText(this.getSpheres().length +" spheres",STATIC_VALUES.MAX_X_COORD-65,STATIC_VALUES.MAX_Y_COORD-20 , 60);
+    // STATIC_VALUES.CONTEXT.fillText(this.getSize() +" spheres",STATIC_VALUES.MAX_X_COORD-65,STATIC_VALUES.MAX_Y_COORD-20 , 60);
 
 	FPS.frames_displayed++;
 
@@ -229,10 +221,10 @@ CollisionManager.prototype.displayFrame = function(){
 
 // Result between 0 and 1
 function normalizedXDistance(distance){
-    return distance * (STATIC_VALUES.MAX_X_COORD - STATIC_VALUES.MIN_X_COORD)/(STATIC_VALUES.MAX_X-STATIC_VALUES.MIN_X);
+    return distance * STATIC_VALUES.NORM_X_RATIO;
 }
 function normalizedYDistance(distance){
-    return distance * (STATIC_VALUES.MAX_Y_COORD - STATIC_VALUES.MIN_Y_COORD) / (STATIC_VALUES.MAX_Y-STATIC_VALUES.MIN_Y);
+    return distance * STATIC_VALUES.NORM_Y_RATIO;
 }
 
 
