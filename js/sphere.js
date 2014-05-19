@@ -48,7 +48,7 @@ Sphere.prototype.Move = function(dt) {
 };
 Sphere.prototype.Draw = function(context){
 	// context.drawImage(hiddenCanvas,this.drawn_x,this.drawn_y,this.drawn_width , this.drawn_height, normalizedXDistance(this.x-this.radius), normalizedYDistance(this.y-this.radius),this.drawn_width , this.drawn_height);
-	context.drawImage(this.hiddenCanvas , normalizedXDistance(this.x-this.radius),normalizedYDistance(this.y-this.radius),normalizedXDistance(this.diameter) , normalizedYDistance(this.diameter));
+	context.drawImage(this.hiddenCanvas , normalizedXDistance(this.x-this.radius),normalizedYDistance(this.y-this.radius));
 	// context.fillStyle = "black";
 	//context.fillText(this.id,normalizedXDistance(this.x),normalizedYDistance(this.y),normalizedXDistance(2*this.radius));
 	//context.fillText(this.id,normalizedXDistance(this.x)+normalizedXDistance(this.radius),normalizedYDistance(this.y)-normalizedXDistance(this.radius),normalizedXDistance(2*this.radius));

@@ -221,10 +221,10 @@ CollisionManager.prototype.displayFrame = function(){
 
 // Result between 0 and 1
 function normalizedXDistance(distance){
-    return distance * STATIC_VALUES.NORM_X_RATIO;
+    return Math.round(distance * STATIC_VALUES.NORM_X_RATIO);
 }
 function normalizedYDistance(distance){
-    return distance * STATIC_VALUES.NORM_Y_RATIO;
+    return Math.round(distance * STATIC_VALUES.NORM_Y_RATIO);
 }
 
 

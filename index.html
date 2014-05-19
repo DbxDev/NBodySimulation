@@ -61,6 +61,8 @@
 				<dl class="tabs" data-tab>
 					<dd id="standard" class="active"><a href="#panelStandard">Standard</a></dd>
 					<dd id="brownian"><a href="#panelBrownian">Brownian motion</a></dd>
+					<dd id="heatDiffusion"><a href="#panelHeatDiffusion">Heat Diffusion</a></dd>
+					<dd id="gasDiffusion"><a href="#panelDiffusion">Gas Diffusion</a></dd>
 				</dl>
 			</div>
 			<div class="large-5 columns">
@@ -145,6 +147,124 @@
 						<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
 							<div class ="large-12 columns">
 								<div id="radiusOfSpheresBrownian" class="row"></div>
+							</div>
+						</div>
+					</div>
+					<div class="content" id="panelHeatDiffusion">
+						<div class="row ">
+							<div class="large-12 columns">
+								<h5> Parameters </h5>
+							</div>
+						</div>
+						<div class="row">
+							<div class ="large-12 columns">
+								<div id="infos" ></div>
+							</div>
+						</div>
+
+						<div class="row">
+							<label>
+								<div class="large-8 columns">
+									<span data-tooltip class="has-tip tip-left" title="Too many spheres won't fit in the area.">Number of spheres :</span>
+								</div>
+								<div class ="large-4  columns">	
+									<input type="number" step="any" id="numberOfSphereDisplayHeatDiffusion"/>	
+								</div>
+							</label>
+						</div>
+						<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+							<div class="large-12 columns" >
+								<div id="numberOfSpheresHeatDiffusion" class="row"></div>
+							</div>
+						</div>
+						
+						<div class="row">
+							<label>
+								<div class="large-8 columns">
+									<span data-tooltip class="has-tip tip-left" title="Too big spheres won't fit in the area.">Radius of spheres : </span>
+								</div>
+								<div class ="large-4  columns">	
+									<input type="number" step="any" id="radiusDisplayHeatDiffusion"/>
+								</div>
+							</label>
+						</div>
+						<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+							<div class ="large-12 columns">
+								<div id="radiusOfSpheresHeatDiffusion" class="row"></div>
+							</div>
+						</div>
+						<div class="row">
+							<label>
+								<div class="large-8 columns">
+									<span data-tooltip class="has-tip tip-left" title="The bigger the difference, the more visible the effects">Left Temperature : </span>
+								</div>
+								<div class ="large-4  columns">	
+									<input type="number" step="any" id="leftTemperatureDisplayHeatDiffusion"/>
+								</div>
+							</label>
+						</div>
+						<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+							<div class ="large-12 columns">
+								<div id="leftTemperatureHeatDiffusion" class="row"></div>
+							</div>
+						</div>
+						<div class="row">
+							<label>
+								<div class="large-8 columns">
+									<span data-tooltip class="has-tip tip-left" title="The bigger the difference, the more visible the effects">Right Temperature : </span>
+								</div>
+								<div class ="large-4  columns">	
+									<input type="number" step="any" id="rightTemperatureDisplayHeatDiffusion"/>
+								</div>
+							</label>
+						</div>
+						<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+							<div class ="large-12 columns">
+								<div id="rightTemperatureHeatDiffusion" class="row"></div>
+							</div>
+						</div>
+					</div>
+					<div class="content" id="panelGasDiffusion">
+						<div class="row ">
+							<div class="large-12 columns">
+								<h5> Parameters </h5>
+							</div>
+						</div>
+						<div class="row">
+							<div class ="large-12 columns">
+								<div id="infos" ></div>
+							</div>
+						</div>
+
+						<div class="row">
+							<label>
+								<div class="large-8 columns">
+									<span data-tooltip class="has-tip tip-left" title="Too many spheres won't fit in the area.">Number of spheres :</span>
+								</div>
+								<div class ="large-4  columns">	
+									<input type="number" step="any" id="numberOfSphereDisplayGasDiffusion"/>	
+								</div>
+							</label>
+						</div>
+						<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+							<div class="large-12 columns" >
+								<div id="numberOfSpheresGasDiffusion" class="row"></div>
+							</div>
+						</div>
+						
+						<div class="row">
+							<label>
+								<div class="large-8 columns">
+									<span data-tooltip class="has-tip tip-left" title="Too big spheres won't fit in the area.">Radius of spheres : </span>
+								</div>
+								<div class ="large-4  columns">	
+									<input type="number" step="any" id="radiusDisplayGasDiffusion"/>
+								</div>
+							</label>
+						</div>
+						<div class="row" style="padding-left : 1em; margin-bottom : 1em;">
+							<div class ="large-12 columns">
+								<div id="radiusOfSpheresGasDiffusion" class="row"></div>
 							</div>
 						</div>
 					</div>

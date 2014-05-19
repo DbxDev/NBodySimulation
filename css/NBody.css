@@ -17,6 +17,9 @@ div.node{
 	display:inline-block;
 	display: table-cell;
 }
+.tabs dd>a {
+	padding : 0.5rem 1rem;
+}
 .left-border{
 	border-left : 1px solid black;
 }

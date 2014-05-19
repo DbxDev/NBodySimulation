@@ -70,7 +70,7 @@ function PriorityQueue(){
     var swap = function(i,j){
         var old_swap = heap[i];
         heap[i] = heap[j];
-        heap[j] = old_swap
+        heap[j] = old_swap;
     };
     /** Delete and return the max node **/
     this.DelMax = function() {
