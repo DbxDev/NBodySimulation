@@ -44,10 +44,10 @@ function startHeatDiffusion(N,R,T_left, T_right){
 		throw e;
 	}  
 }
-function startGasDiffusion(N,R){
+function startGasDiffusion(N,R,V){
 	var spheres;
 	try {
-		spheres = generateNGasDiffusion(N, R);
+		spheres = generateNGasDiffusion(N, R , V);
 		startSimulation(spheres);
 	} catch(e) {
 		throw e;
@@ -315,23 +315,23 @@ function generateNHeatDiffusion(N, R,T_left,T_right){
 	}
 	return spheres;
 }
-function generateNGasDiffusion(N, R) {
-	var r_margin= R * 1.01 // 1% margin between 2 objects
+function generateNGasDiffusion(N, R, V) {
+	var r_margin= R * 1.1 // 10% of R as margin between 2 objects
 	var D = 2 * R ;
 	var d_margin = D * 1.01 ;
 	var elem_on_one_line = parseInt(1/d_margin); // /!\ if MAX_X != 1 or MIN_X != 0 this is wrong
 	var maxIndex = elem_on_one_line * elem_on_one_line;
 	
-	var elem_one_line_init = Math.ceil(Math.sqrt(N)); // We put spheres in a box in the middle of the screen
+	var elem_one_line_init = Math.ceil(Math.sqrt(N) * 1.1); // We put spheres in a box in the middle of the screen
 	var index_margin = Math.floor((elem_on_one_line - elem_one_line_init) * 0.5);
-	if (maxIndex / N > 0.8) throw new Error("Too many or too big spheres for a diffusion.");
+	if (N / maxIndex > 0.8) throw new Error("Too many or too big spheres for a diffusion.");
 	var spheres = new Array();
    
 	for (var i=0 ; i<N ; i++) {
-		vx=(1-2*Math.random())*0.3 , vy=(1-2*Math.random())*0.3;
+		vx=(1-2*Math.random())*V , vy=(1-2*Math.random())*V;
 		r = Math.floor((Math.random()*256)) , g= Math.floor((Math.random()*256)) , b = Math.floor((Math.random()*256));
-		x = r_margin + d_margin*(index_margin + Math.floor(i/elem_on_one_line));
-		y= r_margin + d_margin*(index_margin + i%elem_on_one_line); // rest
+		x = r_margin + d_margin*(index_margin + Math.floor(i/elem_one_line_init));
+		y= r_margin + d_margin*(index_margin + i%elem_one_line_init); // rest
 		spheres[i] = new Sphere(R,1,x , y,vx,vy,r,g,b,i);
 
 	}

@@ -5,38 +5,28 @@ var GASDIFFUSION_SIMULATION = "3";
 
 $(document).ready(function () {	
 	createSlider('numberOfSpheresNormal' , 1250, 1 , 2000,'numberOfSphereDisplayNormal' , callbackSlideValue('numberOfSphereDisplayNormal'));
-    createSlider('radiusOfSpheresNormal' , 2 , 0 , 50,'radiusDisplayNormal' , callbackSlideValueRadius('radiusDisplayNormal'));
+    createSlider('radiusOfSpheresNormal' , 2 , 0 , 50,'radiusDisplayNormal' , callbackSlideScaledValue('radiusDisplayNormal',1000));
 	$( "#radiusDisplayNormal" ).val( $("#radiusOfSpheresNormal").slider( "value" )/1000 );
 	
 	
 	createSlider('numberOfSpheresBrownian' , 1250, 1 , 1500,'numberOfSphereDisplayBrownian' , callbackSlideValue('numberOfSphereDisplayBrownian'));
-    createSlider('radiusOfSpheresBrownian' , 2, 0 , 10,'radiusDisplayBrownian' , callbackSlideValueRadius('radiusDisplayBrownian'));
+    createSlider('radiusOfSpheresBrownian' , 2, 0 , 10,'radiusDisplayBrownian' , callbackSlideScaledValue('radiusDisplayBrownian',1000));
 	$( "#radiusDisplayBrownian" ).val( $("#radiusOfSpheresBrownian").slider( "value" )/1000 );
 	
 	// Diffusion 1 : temperature diff
 	createSlider('numberOfSpheresHeatDiffusion' , 700, 500 , 1500,'numberOfSphereDisplayHeatDiffusion' , callbackSlideValue('numberOfSphereDisplayHeatDiffusion'));
-	createSlider('radiusOfSpheresHeatDiffusion' , 10, 0 , 20,'radiusDisplayHeatDiffusion' , callbackSlideValueRadius('radiusDisplayHeatDiffusion'));
+	createSlider('radiusOfSpheresHeatDiffusion' , 10, 0 , 20,'radiusDisplayHeatDiffusion' , callbackSlideScaledValue('radiusDisplayHeatDiffusion',1000));
 	$( "#radiusDisplayHeatDiffusion" ).val( $("#radiusOfSpheresHeatDiffusion").slider( "value" )/1000 );
 	
 	createSlider('rightTemperatureHeatDiffusion' , 90, 0 , 100,'rightTemperatureDisplayHeatDiffusion' , callbackSlideValue('rightTemperatureDisplayHeatDiffusion'));
 	createSlider('leftTemperatureHeatDiffusion' , 10, 0 , 100,'leftTemperatureDisplayHeatDiffusion' , callbackSlideValue('leftTemperatureDisplayHeatDiffusion'));
 	
 	// Diffusion 2 : gas diff
-	createSlider('numberOfSpheresGasDiffusion' , 700, 500 , 1500,'numberOfSphereDisplayGasDiffusion' , callbackSlideValue('numberOfSphereDisplayGasDiffusion'));
-	createSlider('radiusOfSpheresGasDiffusion' , 10, 0 , 20,'radiusDisplayGasDiffusion' , callbackSlideValueRadius('radiusDisplayGasDiffusion'));
+	createSlider('numberOfSpheresGasDiffusion' , 800, 10 , 1500,'numberOfSphereDisplayGasDiffusion' , callbackSlideValue('numberOfSphereDisplayGasDiffusion'));
+	createSlider('radiusOfSpheresGasDiffusion' , 4, 0 , 20,'radiusDisplayGasDiffusion' , callbackSlideScaledValue('radiusDisplayGasDiffusion',1000));
+	createSlider('velocityGasDiffusion' , 1, 0 , 100,'velocityDisplayGasDiffusion' , callbackSlideScaledValue('velocityDisplayGasDiffusion',100));
+	$( "#velocityDisplayGasDiffusion" ).val( $("#velocityGasDiffusion").slider( "value" )/100 );
 	$( "#radiusDisplayGasDiffusion" ).val( $("#radiusOfSpheresGasDiffusion").slider( "value" )/1000 );
-
-	
-    // $('button#startBrownian').click(function(){
-        // N = $("input#numberOfSphereDisplayBrownian").val();
-        // R = $("input#radiusDisplayBrownian").val();
-		// N = parseInt(N); R = parseFloat(R);
-        // try {
-			// startBrownian(N,R);
-		// } catch(e) {
-			// $('#error').text(e.message);
-		// }
-    // });
 
     $('button#startButton').click(function(){
 		$(this).addClass('disabled');
@@ -58,6 +48,8 @@ $(document).ready(function () {
 		} else if (isGasDiffusion()) {
 			N = $("input#numberOfSphereDisplayGasDiffusion").val();
 			R = $("input#radiusDisplayGasDiffusion").val();
+			V =$("input#velocityDisplayGasDiffusion").val();
+			V = parseFloat(V);
 		} else {
 			return ;
 		}
@@ -71,22 +63,37 @@ $(document).ready(function () {
 				else if (isHeatDiffusion())
 					startHeatDiffusion(N,R,T_left,T_right);
 				else if (isGasDiffusion())
-					startGasDiffusion(N,R);
+					startGasDiffusion(N,R,V);
 			}	
 		} catch(e) {
-			$('#error').text(e.message);
+			buildMessage(e.message , TYPE_ALERT);
 		}
 		$(this).removeClass('disabled');
     });
     $("#stopSimulation").click(function(){
         stopSimulation(function(){
-            $('#message').text("Simulation stopped.");
-            $('#error').text("");
+			buildMessage("Simulation stopped.",TYPE_SUCCESS);
 			clearCanvas();
-            setTimeout(function(){ $('#message').text("");},3000);
         });
     });
 });
+var TYPE_SUCCESS=0;
+var TYPE_ALERT=1;
+function buildMessage(text , type){
+	if (type == TYPE_SUCCESS )
+		class_type="success";
+	else if (type == TYPE_ALERT )
+		class_type = "alert";
+	else
+		class_type = "info";
+		
+	var alert = '<div data-alert class="alert-box '+class_type+' radius">' + text+ '<a href="#" class="close">&times;</a></div>';
+	$('#error').append(alert);
+	setTimeout(function(){
+		$('#error').children().effect( { effect : 'blind' , duration : 3000 , complete : function(){$('#error').text("");} });
+		} , 3000);
+}
+
 function getSimulationType(){
 	if ($("dd#standard").hasClass('active') ) return STANDART_SIMULATION;
 	if ($("dd#brownian").hasClass('active') ) return BROWNIAN_SIMULATION;
@@ -105,30 +112,41 @@ function isHeatDiffusion(){
 function isGasDiffusion(){
 	return getSimulationType() == GASDIFFUSION_SIMULATION;
 }
+
 function callbackSlideValue(idDisplay) {
-	return function(event, ui) {
-            $( "#"+idDisplay ).val( ui.value );
-    };
+	return callbackSlideScaledValue(idDisplay , 1);
 }
-function callbackSlideValueRadius(idDisplay){
+function callbackSlideScaledValue(idDisplay , scale){
+	if (scale !== 1)
+		$( "#"+idDisplay ).prop('disabled',true);
+		
 	return function(event, ui) {
-            $( "#"+idDisplay ).val( ui.value / 1000 );
+            $( "#"+idDisplay ).val( ui.value / scale );
     };
 };
-
 
 function clearCanvas(){
 	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
 }
 function createSlider(idSelector, value, min , max , idDisplay ,callback) {
-    $('#'+idSelector).slider({
+    var slider = $('#'+idSelector);
+	slider.slider({
         range: "min",
         value: value,
         min: min,
         max: max
     });
-    if (idDisplay && callback) {
-        $('#'+idSelector).on("slide" , callback);
-		$( "#"+idDisplay ).val( $('#'+idSelector).slider( "value" ) );
-    }
+	if (idDisplay) {
+		var display = $('#'+idDisplay);
+		display.on('change' , function(){
+			console.log(this.value);
+			slider.slider({value : this.value});
+			this.value=this.value/1000;
+		
+		});
+		if (callback) {
+			slider.on("slide" , callback);
+			display.val( slider.slider( "value" ) );
+		}
+	}
 }
