@@ -204,8 +204,8 @@ CollisionManager.prototype.moveSpheres = function(duration) {
 };
 
 CollisionManager.prototype.displayFrame = function(){
-
-	STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
+	if (!STATIC_VALUES.ARTISTIC_MODE)
+		STATIC_VALUES.CONTEXT.clearRect(STATIC_VALUES.MIN_X_COORD, STATIC_VALUES.MIN_Y_COORD, STATIC_VALUES.MAX_X_COORD, STATIC_VALUES.MAX_Y_COORD);
 
 	for (var i=0 ; i< this.getSize() ; i++ ) {
 		this.getSpheres()[i].Draw(STATIC_VALUES.CONTEXT);

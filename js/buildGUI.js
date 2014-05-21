@@ -27,7 +27,7 @@ $(document).ready(function () {
 	createSlider('velocityGasDiffusion' , 1, 0 , 100,'velocityDisplayGasDiffusion' , callbackSlideScaledValue('velocityDisplayGasDiffusion',100));
 	$( "#velocityDisplayGasDiffusion" ).val( $("#velocityGasDiffusion").slider( "value" )/100 );
 	$( "#radiusDisplayGasDiffusion" ).val( $("#radiusOfSpheresGasDiffusion").slider( "value" )/1000 );
-
+	
     $('button#startButton').click(function(){
 		$(this).addClass('disabled');
 		var N , R;
@@ -70,13 +70,26 @@ $(document).ready(function () {
 		}
 		$(this).removeClass('disabled');
     });
+	
     $("#stopSimulation").click(function(){
-        stopSimulation(function(){
+        stopSimuClearAndNotify();
+    });
+	
+	$('#art_mod').change(function(){
+		if ($(this).is(':checked'))
+			STATIC_VALUES.ARTISTIC_MODE = true;
+		else
+			STATIC_VALUES.ARTISTIC_MODE = false;
+	});
+});
+
+function stopSimuClearAndNotify(){
+	stopSimulation(function(){
 			buildMessage("Simulation stopped.",TYPE_SUCCESS);
 			clearCanvas();
         });
-    });
-});
+}
+
 var TYPE_SUCCESS=0;
 var TYPE_ALERT=1;
 function buildMessage(text , type){
