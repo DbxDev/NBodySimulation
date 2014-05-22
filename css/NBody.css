@@ -8,33 +8,37 @@ body {
 p{
 	line-height : 1.5;
 }
-div.centered{
-	width : 100%;
-	text-align : center;
-	display: table;
-}
-div.node{
-	text-align : center;
-	display:inline-block;
-	display: table-cell;
-}
 .tabs dd>a {
 	padding : 0.5rem 1rem;
 }
-.left-border{
-	border-left : 1px solid black;
-}
 canvas {
 	background-color : white;
-    
 }
-div#error{
-	color : red;
+div#temp_messages_on_top{
+	position : fixed;
+	z-index : 99;
+	top : 0px;
+	left : 35%;
+	width : 30%;
+	height : 45px;
 }
-div#message{
-    color : #1c94c4;
+.msg {
+	border-style: solid;
+	border-width: 1px;
+	display: block;
+	font-weight: normal;
+	padding-top : 0.875rem;
+	padding-left : 1.5rem;
+	padding-bottom : 0.875rem;
+	padding-right : 0.875rem;
+	font-size: 0.8125rem;
+	transition: opacity 300ms ease-out;
+	background-color: #43ac6a;
+    border-color: #3a945b;
+	color: white;
+	border-radius: 3px;
 }
-div.alert-box{
-	
-	
+.msg.alert {
+	background-color: #f04124;
+    border-color: #de2d0f;
 }

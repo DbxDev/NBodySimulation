@@ -99,13 +99,22 @@ function buildMessage(text , type){
 	else if (type == TYPE_ALERT )
 		class_type = "alert";
 	else
-		class_type = "info";
+		class_type = "";
 		
-	var alert = '<div data-alert class="alert-box '+class_type+' radius">' + text+ '<a href="#" class="close">&times;</a></div>';
-	$('#error').append(alert);
-	setTimeout(function(){
-		$('#error').children().effect( { effect : 'blind' , duration : 3000 , complete : function(){$('#error').text("");} });
-		} , 3000);
+	var alert = '<div class="msg ' +class_type+'" >' + text+ '</div>' ,
+		msg_content = $('#temp_messages_on_top'),
+		elem;
+	
+	msg_content.append(alert);
+	elem = msg_content.children(':last-child');
+	setTimeout( function(){
+			elem.effect( {
+				effect : 'blind' , 
+				duration : 10000 ,
+				complete : function(){ elem.remove(); }
+			});
+		}
+		, 5000);
 }
 
 function getSimulationType(){
