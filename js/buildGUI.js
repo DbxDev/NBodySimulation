@@ -5,26 +5,26 @@ var GASDIFFUSION_SIMULATION = "3";
 
 $(document).ready(function () {	
 	createSlider('numberOfSpheresNormal' , 1250, 1 , 2000,'numberOfSphereDisplayNormal' , callbackSlideValue('numberOfSphereDisplayNormal'));
-    createSlider('radiusOfSpheresNormal' , 2 , 0 , 50,'radiusDisplayNormal' , callbackSlideScaledValue('radiusDisplayNormal',1000));
+    createSlider('radiusOfSpheresNormal' , 2 , 1 , 50,'radiusDisplayNormal' , callbackSlideScaledValue('radiusDisplayNormal',1000));
 	$( "#radiusDisplayNormal" ).val( $("#radiusOfSpheresNormal").slider( "value" )/1000 );
 	
 	
 	createSlider('numberOfSpheresBrownian' , 1250, 1 , 1500,'numberOfSphereDisplayBrownian' , callbackSlideValue('numberOfSphereDisplayBrownian'));
-    createSlider('radiusOfSpheresBrownian' , 2, 0 , 10,'radiusDisplayBrownian' , callbackSlideScaledValue('radiusDisplayBrownian',1000));
+    createSlider('radiusOfSpheresBrownian' , 2, 1 , 10,'radiusDisplayBrownian' , callbackSlideScaledValue('radiusDisplayBrownian',1000));
 	$( "#radiusDisplayBrownian" ).val( $("#radiusOfSpheresBrownian").slider( "value" )/1000 );
 	
 	// Diffusion 1 : temperature diff
 	createSlider('numberOfSpheresHeatDiffusion' , 700, 500 , 1500,'numberOfSphereDisplayHeatDiffusion' , callbackSlideValue('numberOfSphereDisplayHeatDiffusion'));
-	createSlider('radiusOfSpheresHeatDiffusion' , 10, 0 , 20,'radiusDisplayHeatDiffusion' , callbackSlideScaledValue('radiusDisplayHeatDiffusion',1000));
+	createSlider('radiusOfSpheresHeatDiffusion' , 10, 1 , 20,'radiusDisplayHeatDiffusion' , callbackSlideScaledValue('radiusDisplayHeatDiffusion',1000));
 	$( "#radiusDisplayHeatDiffusion" ).val( $("#radiusOfSpheresHeatDiffusion").slider( "value" )/1000 );
 	
-	createSlider('rightTemperatureHeatDiffusion' , 90, 0 , 100,'rightTemperatureDisplayHeatDiffusion' , callbackSlideValue('rightTemperatureDisplayHeatDiffusion'));
-	createSlider('leftTemperatureHeatDiffusion' , 10, 0 , 100,'leftTemperatureDisplayHeatDiffusion' , callbackSlideValue('leftTemperatureDisplayHeatDiffusion'));
+	createSlider('rightTemperatureHeatDiffusion' , 90, 1 , 100,'rightTemperatureDisplayHeatDiffusion' , callbackSlideValue('rightTemperatureDisplayHeatDiffusion'));
+	createSlider('leftTemperatureHeatDiffusion' , 10, 1 , 100,'leftTemperatureDisplayHeatDiffusion' , callbackSlideValue('leftTemperatureDisplayHeatDiffusion'));
 	
 	// Diffusion 2 : gas diff
 	createSlider('numberOfSpheresGasDiffusion' , 800, 10 , 1500,'numberOfSphereDisplayGasDiffusion' , callbackSlideValue('numberOfSphereDisplayGasDiffusion'));
-	createSlider('radiusOfSpheresGasDiffusion' , 4, 0 , 20,'radiusDisplayGasDiffusion' , callbackSlideScaledValue('radiusDisplayGasDiffusion',1000));
-	createSlider('velocityGasDiffusion' , 1, 0 , 100,'velocityDisplayGasDiffusion' , callbackSlideScaledValue('velocityDisplayGasDiffusion',100));
+	createSlider('radiusOfSpheresGasDiffusion' , 4, 1 , 20,'radiusDisplayGasDiffusion' , callbackSlideScaledValue('radiusDisplayGasDiffusion',1000));
+	createSlider('velocityGasDiffusion' , 1, 1 , 100,'velocityDisplayGasDiffusion' , callbackSlideScaledValue('velocityDisplayGasDiffusion',100));
 	$( "#velocityDisplayGasDiffusion" ).val( $("#velocityGasDiffusion").slider( "value" )/100 );
 	$( "#radiusDisplayGasDiffusion" ).val( $("#radiusOfSpheresGasDiffusion").slider( "value" )/1000 );
 	
@@ -75,6 +75,7 @@ $(document).ready(function () {
         stopSimuClearAndNotify();
     });
 	
+	$('#art_mod').attr('checked',false);
 	$('#art_mod').change(function(){
 		if ($(this).is(':checked'))
 			STATIC_VALUES.ARTISTIC_MODE = true;

@@ -138,7 +138,7 @@ function StaticValues(canvas) {
 
 	this.TIME_LIMIT = 1000 // Events longer are discarded
 	
-	this.ARTISTIC_MODE = true;
+	this.ARTISTIC_MODE = false;
 }
 
 function generateNSpheres(N , R) {
